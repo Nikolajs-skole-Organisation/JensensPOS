@@ -8,8 +8,8 @@ on:
 
 jobs:
   java-test:
-    uses: ./.github/workflows/java-test-reusable.yml
+    uses: ./.github/workflows/Java-test-reusable.yml
 
   docker-ci:
     needs: java-test
-    uses: ./.github/workflows/docker-ci-reusable.yml
+    uses: ./.github/workflows/Docker-CI-reusable.yml
