@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DrinkItem {
+public class DrinkItem extends Item{
     private Long id;
     private String name;
     private Double price;

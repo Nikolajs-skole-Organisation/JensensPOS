@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Order {
 
+    private Long id;
     private List<FoodItem> foodItems;
     private List<DrinkItem> drinkItems;
     private String nameOfServer;

@@ -4,21 +4,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class FoodItem extends Item{
+public class Item {
+
     private Long id;
     private String name;
-    private Double price;
-    private List<Condiment> condiments;
+    private double price;
 
-    public FoodItem(Long id, String name, Double price, List<Condiment> condiments) {
+    public Item(Long id, String name, double price) {
         this.id = id;
         this.name = name;
         this.price = price;
-        this.condiments = condiments;
     }
 }
