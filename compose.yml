@@ -25,7 +25,7 @@ services:
 
   app:
     build:
-      context: ./backend
+      context: ./BackendPOS
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
