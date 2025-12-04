@@ -24,4 +24,4 @@ jobs:
 
       - name: run tests
         run: mvn -B test
-        working-directory: backend
+        working-directory: backendPOS
