@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bordoversigt</title>
+    <link rel="stylesheet" href="../../css/main.css" />
+  </head>
+
+  <body>
+    <h1>Bordoversigt</h1>
+
+    <div id="floorViewport">
+  <table id="floor">
+    <tbody id="floorBody"></tbody>
+  </table>
+</div>
+
+<div id="legend">
+  <span class="legend-item"><span class="legend-color free"></span> Ledig</span>
+  <span class="legend-item"><span class="legend-color reserved"></span> Reserveret</span>
+  <span class="legend-item"><span class="legend-color occupied"></span> Optaget</span>
+  <span class="legend-item"><span class="legend-color blocked"></span> Blokeret område</span>
+</div>
+
+    <script
+      type="module"
+      src="../../js/controllers/restaurantTableController.js"
+    ></script>
+  </body>
+</html>
