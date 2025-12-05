@@ -1,0 +1,101 @@
+-- Create database
+CREATE DATABASE IF NOT EXISTS restaurant_menu_db;
+USE restaurant_menu_db;
+
+-- Category table
+CREATE TABLE category (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Insert categories
+INSERT INTO category (name) VALUES
+('FORRETTER'),
+('HOVEDRETTER'),
+('DRINKS'),
+('DESSERTER'),
+('GRATIS'),
+('TILBUD'),
+('PERSONALE_RETTER');
+
+-- Food item table
+CREATE TABLE food_item (
+    food_id                INT PRIMARY KEY AUTO_INCREMENT,
+    name                   VARCHAR(100) NOT NULL,
+    category_id            INT NOT NULL,
+    price                  DECIMAL(10,2),
+    available_for_takeaway BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
+-- View for personnel menu
+CREATE VIEW personnel_menu AS
+SELECT 
+    f.food_id, 
+    f.name, 
+    c.name AS category, 
+    f.price
+FROM 
+    food_item f
+JOIN 
+    category c ON f.category_id = c.category_id
+WHERE 
+    c.name IN ('DRINKS', 'GRATIS', 'PERSONALE_RETTER');
+
+-- Create database
+CREATE DATABASE IF NOT EXISTS restaurant_menu_db;
+USE restaurant_menu_db;
+
+-- Category table
+CREATE TABLE category (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Insert categories
+INSERT INTO category (name) VALUES
+('FORRETTER'),
+('HOVEDRETTER'),
+('DRINKS'),
+('DESSERTER'),
+('GRATIS'),
+('TILBUD'),
+('PERSONALE_RETTER');
+
+-- Food item table
+CREATE TABLE food_item (
+    food_id                INT PRIMARY KEY AUTO_INCREMENT,
+    name                   VARCHAR(100) NOT NULL,
+    category_id            INT NOT NULL,
+    price                  DECIMAL(10,2),
+    available_for_takeaway BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
+-- View for personnel menu
+CREATE VIEW personnel_menu AS
+SELECT 
+    f.food_id, 
+    f.name, 
+    c.name AS category, 
+    f.price
+FROM 
+    food_item f
+JOIN 
+    category c ON f.category_id = c.category_id
+WHERE 
+    c.name IN ('DRINKS', 'GRATIS', 'PERSONALE_RETTER');
+
+-- View for takeaway menu
+CREATE VIEW takeaway_menu AS
+SELECT 
+    f.food_id, 
+    f.name, 
+    c.name AS category, 
+    f.price
+FROM 
+    food_item f
+JOIN 
+    category c ON f.category_id = c.category_id
+WHERE 
+    f.available_for_takeaway = TRUE;
