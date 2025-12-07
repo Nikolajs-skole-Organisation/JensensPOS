@@ -1,4 +1,4 @@
-package org.example.backendpos.model;
+package org.example.backendpos.model.order;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

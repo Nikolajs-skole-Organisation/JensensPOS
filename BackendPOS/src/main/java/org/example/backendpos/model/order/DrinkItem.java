@@ -1,4 +1,4 @@
-package org.example.backendpos.model;
+package org.example.backendpos.model.order;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class DrinkItem extends Item{
+public class DrinkItem extends Item {
     private Boolean includeIce;
 
     public DrinkItem(Long id, String name, Double price, Boolean includeIce) {

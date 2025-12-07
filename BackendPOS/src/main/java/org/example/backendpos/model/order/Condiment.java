@@ -1,4 +1,4 @@
-package org.example.backendpos.model;
+package org.example.backendpos.model.order;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Condiment extends Item{
+public class Condiment extends Item {
     private long id;
     private String name;
     private double price;

@@ -1,6 +1,5 @@
-package org.example.backendpos.model;
+package org.example.backendpos.model.order;
 
-import jakarta.persistence.ManyToMany;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,6 +27,4 @@ public class Order {
         this.amountOfGuests = amountOfGuests;
         this.hasBeenSent = hasBeenSent;
     }
-
-
 }
