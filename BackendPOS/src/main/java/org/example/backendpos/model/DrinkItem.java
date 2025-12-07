@@ -8,15 +8,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class DrinkItem extends Item{
-    private Long id;
-    private String name;
-    private Double price;
     private Boolean includeIce;
 
     public DrinkItem(Long id, String name, Double price, Boolean includeIce) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
+        super(id, name, price);
         this.includeIce = includeIce;
     }
 }

@@ -10,15 +10,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class FoodItem extends Item{
-    private Long id;
-    private String name;
-    private Double price;
     private List<Condiment> condiments;
 
     public FoodItem(Long id, String name, Double price, List<Condiment> condiments) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
+        super(id, name, price);
         this.condiments = condiments;
     }
 }
