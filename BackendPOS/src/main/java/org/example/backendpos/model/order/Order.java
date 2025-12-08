@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,11 +19,8 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Transient
-    private List<FoodItem> foodItems;
-
-    @Transient
-    private List<DrinkItem> drinkItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 
     private String nameOfServer;
     private int tableNumber;
@@ -32,14 +30,8 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    public Order(List<FoodItem> foodItems, List<DrinkItem> drinkItems, String nameOfServer, int tableNumber,
-                 int amountOfGuests, boolean hasBeenSent, OrderStatus orderStatus) {
-        this.foodItems = foodItems;
-        this.drinkItems = drinkItems;
-        this.nameOfServer = nameOfServer;
-        this.tableNumber = tableNumber;
-        this.amountOfGuests = amountOfGuests;
-        this.hasBeenSent = hasBeenSent;
-        this.orderStatus = orderStatus;
+    public void addItem(OrderItem item){
+        items.add(item);
+        item.setOrder(this);
     }
 }
