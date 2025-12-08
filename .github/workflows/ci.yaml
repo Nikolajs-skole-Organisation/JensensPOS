@@ -1,0 +1,15 @@
+name: Java test with caching
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  java-test:
+    uses: ./.github/workflows/java-test-reusable.yaml
+
+  docker-ci:
+    needs: java-test
+    uses: ./.github/workflows/docker-ci-reusable.yaml
