@@ -11,8 +11,8 @@ public class Condiment extends Item {
     private boolean isGratis;
 
 
-    public Condiment(long id, String name, double price, Long categoryId,boolean isGratis) {
-        super(id, name, price, categoryId);
+    public Condiment(long id, String name, double price, Category category,boolean isGratis) {
+        super(name, price, category);
         this.isGratis = isGratis;
     }
 }

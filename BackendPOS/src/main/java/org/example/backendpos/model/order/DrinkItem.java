@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "drink_items")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,12 +16,7 @@ import lombok.Setter;
 }
 )
 public class DrinkItem extends Item {
-
-    @Transient
-    private Boolean includeIce;
-
-    public DrinkItem(String name, Double price, Category category,Boolean includeIce) {
+    public DrinkItem(String name, Double price, Category category){
         super(name, price, category);
-        this.includeIce = includeIce;
     }
 }
