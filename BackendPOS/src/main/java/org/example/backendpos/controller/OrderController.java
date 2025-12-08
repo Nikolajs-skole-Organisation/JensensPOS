@@ -1,9 +1,14 @@
 package org.example.backendpos.controller;
 
+import org.example.backendpos.dto.StartOrderResponse;
+import org.example.backendpos.model.order.Category;
 import org.example.backendpos.model.order.Order;
 import org.example.backendpos.model.order.OrderStatus;
 import org.example.backendpos.service.OrderService;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class OrderController {
@@ -14,11 +19,11 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    public void startOrder(int tableNumber, int amountOfGuests){
-        Order order = new Order();
-        order.setTableNumber(tableNumber);
-        order.setAmountOfGuests(amountOfGuests);
-        order.setOrderStatus(OrderStatus.OPEN);
-        orderService.startOrder(order);
+    public StartOrderResponse startOrder(
+            @RequestParam int tableNumber,
+            @RequestParam int amountOfGuests
+    ){
+
+        return orderService.startOrderResponse(tableNumber, amountOfGuests);
     }
 }

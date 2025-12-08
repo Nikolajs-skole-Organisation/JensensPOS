@@ -1,10 +1,7 @@
 package org.example.backendpos.service;
 
-import org.example.backendpos.model.order.Order;
-
-import java.util.List;
+import org.example.backendpos.dto.StartOrderResponse;
 
 public interface OrderService {
-    List<String> getAllCategories();
-    public void startOrder(Order order);
+    StartOrderResponse startOrderResponse(int tableNumber, int amountOfGuests);
 }

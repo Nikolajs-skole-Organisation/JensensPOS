@@ -8,13 +8,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Condiment extends Item {
-    private long id;
-    private String name;
-    private double price;
     private boolean isGratis;
 
-    public Condiment(long id, String name, double price, boolean isGratis) {
-        super(id, name, price);
+
+    public Condiment(long id, String name, double price, Long categoryId,boolean isGratis) {
+        super(id, name, price, categoryId);
         this.isGratis = isGratis;
     }
 }
