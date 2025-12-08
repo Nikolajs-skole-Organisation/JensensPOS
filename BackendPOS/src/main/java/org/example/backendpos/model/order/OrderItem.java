@@ -31,6 +31,10 @@ public class OrderItem {
     @Column(nullable = false)
     int quantity = 1;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meat_temperature")
+    private MeatTemperature meatTemperature;
+
     public void incrementQuantity(){
         quantity++;
     }

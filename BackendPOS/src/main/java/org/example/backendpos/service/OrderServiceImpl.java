@@ -3,6 +3,7 @@ package org.example.backendpos.service;
 import org.example.backendpos.dto.*;
 import org.example.backendpos.exception.DrinkItemNotFoundException;
 import org.example.backendpos.exception.FoodItemNotFoundException;
+import org.example.backendpos.exception.MissingMeatTemperatureException;
 import org.example.backendpos.exception.OrderNotFoundException;
 import org.example.backendpos.model.order.*;
 import org.example.backendpos.repository.CategoryRepository;
@@ -84,6 +85,10 @@ public class OrderServiceImpl implements OrderService {
             FoodItem foodItem = foodItemRepository.findById(request.itemId())
                     .orElseThrow(() -> new FoodItemNotFoundException("Food item not found with id: " + request.itemId()));
 
+            if (foodItem.isItMeat() && request.meatTemperature() == null){
+                throw new MissingMeatTemperatureException("Meat item requires a meat temperature");
+            }
+
             orderItem = order.getItems().stream()
                     .filter(oi -> oi.getFoodItem() != null &&
                             oi.getFoodItem().getId().equals(foodItem.getId()))
@@ -94,6 +99,9 @@ public class OrderServiceImpl implements OrderService {
                 orderItem = new OrderItem();
                 orderItem.setFoodItem(foodItem);
                 orderItem.setQuantity(1);
+                if (foodItem.isItMeat()){
+                    orderItem.setMeatTemperature(request.meatTemperature());
+                }
                 order.addItem(orderItem);
             } else {
                 orderItem.incrementQuantity();

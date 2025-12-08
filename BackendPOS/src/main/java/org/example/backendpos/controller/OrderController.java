@@ -1,10 +1,13 @@
 package org.example.backendpos.controller;
 
+import org.example.backendpos.dto.AddOrderItemRequest;
 import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.model.order.Category;
 import org.example.backendpos.model.order.Order;
 import org.example.backendpos.model.order.OrderStatus;
 import org.example.backendpos.service.OrderService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +26,11 @@ public class OrderController {
             @RequestParam int tableNumber,
             @RequestParam int amountOfGuests
     ){
-
         return orderService.startOrderResponse(tableNumber, amountOfGuests);
+    }
+
+    public Order addItemToOrder(@PathVariable Long orderId,
+                                @RequestBody AddOrderItemRequest request){
+        return orderService.addItemToOrder(orderId, request);
     }
 }
