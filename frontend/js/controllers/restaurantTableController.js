@@ -28,15 +28,24 @@ async function reloadAndRender() {
 
 // ----- Grid building -----
 function buildGrid(tables) {
-  if (!tables || tables.length === 0) return [];
+  if ((!tables || tables.length === 0) && (!walls || walls.length === 0))
+    return [];
 
-  const maxRow = Math.max(...tables.map((t) => t.rowStart + t.height));
-  const maxCol = Math.max(...tables.map((t) => t.colStart + t.width));
+  const maxRow = Math.max(
+    ...(tables?.map((t) => t.rowStart + t.height) || [0]),
+    ...(walls?.map((w) => w.row + 1) || [0])
+  );
+
+  const maxCol = Math.max(
+    ...(tables?.map((t) => t.colStart + t.width) || [0]),
+    ...(walls?.map((w) => w.col + 1) || [0])
+  );
 
   const grid = Array.from({ length: maxRow }, () =>
     Array.from({ length: maxCol }, () => null)
   );
 
+  // ----- Tables -----
   tables.forEach((t) => {
     for (let r = t.rowStart; r < t.rowStart + t.height; r++) {
       for (let c = t.colStart; c < t.colStart + t.width; c++) {
@@ -46,6 +55,16 @@ function buildGrid(tables) {
           grid[r][c] = { type: "covered" };
         }
       }
+    }
+  });
+
+  // ----- Walls (hardcoded) -----
+  walls.forEach((w) => {
+    if (!grid[w.row][w.col]) {
+      grid[w.row][w.col] = {
+        type: "wall",
+        orientation: w.orientation,
+      };
     }
   });
 
@@ -77,6 +96,7 @@ function renderGrid(grid) {
 
       const td = document.createElement("td");
 
+      // ----- TABLE -----
       if (cell && cell.type === "table") {
         const t = cell.table;
         const status = (t.status || "FREE").toUpperCase();
@@ -91,7 +111,24 @@ function renderGrid(grid) {
 
         td.rowSpan = t.height;
         td.colSpan = t.width;
-      } else {
+      }
+
+      // ----- WALL -----
+      else if (cell && cell.type === "wall") {
+        const o = cell.orientation.toLowerCase();
+        td.classList.add("wall-cell");
+
+        if (o === "vertical") td.classList.add("wall-vertical");
+        else if (o === "horizontal") td.classList.add("wall-horizontal");
+        else if (o === "tjunction") td.classList.add("wall-tjunction");
+        else if (o === "t-up") td.classList.add("wall-t-up");
+        else if (o === "t-down") td.classList.add("wall-t-down");
+        else if (o === "t-left") td.classList.add("wall-t-left");
+        else if (o === "t-right") td.classList.add("wall-t-right");
+      }
+
+      // ----- EMPTY -----
+      else {
         td.classList.add("empty-cell");
       }
 
@@ -102,7 +139,7 @@ function renderGrid(grid) {
   }
 }
 
-// ----- Dynamisk cellestørrelse -----
+// ----- Dynamic cellesize -----
 function updateCellSize(grid) {
   if (!grid || grid.length === 0) return;
 
@@ -125,3 +162,19 @@ function handleTableClick(table) {
   console.log("Table clicked:", table.tableNumber, "status:", table.status);
   // Implementer metode til at starte ordre
 }
+
+// ----- Hardcoded walls -----
+const walls = [
+  { row: 2, col: 16, orientation: "vertical" },
+  { row: 3, col: 16, orientation: "t-up" },
+  { row: 3, col: 14, orientation: "Horizontal" },
+  { row: 3, col: 15, orientation: "Horizontal" },
+  { row: 3, col: 17, orientation: "Horizontal" },
+  { row: 3, col: 18, orientation: "Horizontal" },
+
+  { row: 3, col: 26, orientation: "horizontal" },
+  { row: 3, col: 27, orientation: "horizontal" },
+  { row: 3, col: 28, orientation: "t-left" },
+  { row: 2, col: 28, orientation: "vertical" },
+  { row: 4, col: 28, orientation: "vertical" },
+];

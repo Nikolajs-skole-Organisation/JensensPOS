@@ -1,11 +1,30 @@
+/* ========================================
+   Global Layout / Background
+======================================== */
+
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  background-color: #f4e6d5; 
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ========================================
+   Floor Viewport & Table Grid
+======================================== */
+
 #floorViewport {
-  width: 90vw; 
-  height: 50vh; 
+  width: 90vw;
+  height: 50vh;
   margin: 20px auto;
-  border: 2px solid #444;
-  position: relative;
-  background: #efefef;
+  border: 2px solid #7b2c1f; 
+  background: #f0ddc6;       
   overflow: hidden;
+  position: relative;
 
   display: flex;
   justify-content: center;
@@ -25,47 +44,148 @@
   height: var(--cell-size, 40px);
   padding: 0;
   border: none;
+  position: relative; 
 }
 
+/* ========================================
+   Cell Types / Table Statuses
+======================================== */
+
 .empty-cell {
-  background-color: #eeeeee;
+  background-color: #e8d3b8;
 }
 
 .table-cell {
-  background-color: #c8f7c5;
+  background-color: #f7e4c5;
   font-weight: 600;
   text-align: center;
   font-size: 0.9rem;
+  color: #2a140a;
 }
 
 .blocked-cell {
-  background-color: #bdbdbd;
+  background-color: #8a8278;
+  color: #f9f5ee;
 }
 
 .status-free {
-  background-color: #c8f7c5;
-}
-.status-occupied {
-  background-color: #f8c4c4;
-}
-.status-reserved {
-  background-color: #ffe9a3;
+  background-color: #5f8f3a;
+  color: #f9f5ee;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center; 
+.status-occupied {
+  background-color: #b9322c;
+  color: #f9f5ee;
 }
+
+.status-reserved {
+  background-color: #c7932c;
+  color: #2a140a;
+}
+
+/* ========================================
+   Divider Walls (Vertical / Horizontal)
+======================================== */
+
+.wall-cell {
+  background-color: #e8d3b8;
+}
+
+.wall-cell::before,
+.wall-t-up::before,
+.wall-t-up::after,
+.wall-t-down::before,
+.wall-t-down::after,
+.wall-t-left::before,
+.wall-t-left::after,
+.wall-t-right::before,
+.wall-t-right::after {
+  content: "";
+  position: absolute;
+  background-color: #444;
+}
+
+.wall-vertical::before {
+  top: 0;
+  bottom: 0;
+  width: 20%;
+  left: 40%;
+}
+
+.wall-horizontal::before {
+  left: 0;
+  right: 0;
+  height: 20%;
+  top: 40%;
+}
+
+/* ========================================
+   T-Junctions (Directional)
+======================================== */
+
+.wall-t-up::before {  
+  left: 0;
+  right: 0;
+  height: 20%;
+  top: 40%;
+}
+.wall-t-up::after {   
+  top: 0;
+  bottom: 40%;
+  width: 20%;
+  left: 40%;
+}
+
+
+.wall-t-down::before { 
+  left: 0;
+  right: 0;
+  height: 20%;
+  top: 40%;
+}
+.wall-t-down::after {  
+  top: 40%;
+  bottom: 0;
+  width: 20%;
+  left: 40%;
+}
+
+.wall-t-left::before { 
+  top: 0;
+  bottom: 0;
+  width: 20%;
+  left: 40%;
+}
+.wall-t-left::after { 
+  left: 0;
+  right: 40%;
+  height: 20%;
+  top: 40%;
+}
+
+.wall-t-right::before { 
+  top: 0;
+  bottom: 0;
+  width: 20%;
+  left: 40%;
+}
+.wall-t-right::after { 
+  left: 40%;
+  right: 0;
+  height: 20%;
+  top: 40%;
+}
+
+/* ========================================
+   Legend
+======================================== */
 
 #legend {
   display: flex;
   gap: 20px;
   margin-top: 10px;
   font-size: 0.9rem;
-  justify-content: center; 
+  justify-content: center;
 }
 
 .legend-item {
@@ -81,18 +201,49 @@ body {
   display: inline-block;
 }
 
-.legend-color.free {
-  background-color: #c8f7c5;
+.legend-color.free     { background-color: #5f8f3a; }
+.legend-color.reserved { background-color: #c7932c; }
+.legend-color.occupied { background-color: #b9322c; }
+.legend-color.blocked  { background-color: #8a8278; }
+.legend-color.wall {
+  background: repeating-linear-gradient(
+    90deg,
+    #444,
+    #444 4px,
+    transparent 4px,
+    transparent 8px
+  );
 }
 
-.legend-color.reserved {
-  background-color: #ffe9a3;
+/* ========================================
+   Buttons
+======================================== */
+
+.btn {
+  padding: 0.6rem 1.3rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-.legend-color.occupied {
-  background-color: #f8c4c4;
+.btn-primary {
+  background-color: #7b2c1f;
+  color: #f9f5ee;
 }
 
-.legend-color.blocked {
-  background-color: #bdbdbd;
+.btn-primary:hover {
+  background-color: #632217;
+}
+
+#actions {
+  margin-top: 100px;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
 }
