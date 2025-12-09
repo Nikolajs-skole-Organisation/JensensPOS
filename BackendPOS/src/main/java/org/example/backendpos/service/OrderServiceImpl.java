@@ -32,12 +32,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public StartOrderResponse startOrderResponse(int tableNumber, int amountOfGuests) {
-        Order order = new Order();
-        order.setTableNumber(tableNumber);
-        order.setAmountOfGuests(amountOfGuests);
-        order.setOrderStatus(OrderStatus.OPEN);
 
-        Order saved = orderRepository.save(order);
+        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .orElseGet(() -> {
+                    Order newOrder = new Order();
+                    newOrder.setTableNumber(tableNumber);
+                    newOrder.setAmountOfGuests(amountOfGuests);
+                    newOrder.setOrderStatus(OrderStatus.OPEN);
+                    return  orderRepository.save(newOrder);
+                });
 
         List<Category> categories = categoryRepository.findAll();
 
@@ -66,10 +69,10 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         return new StartOrderResponse(
-                saved.getId(),
-                saved.getTableNumber(),
-                saved.getAmountOfGuests(),
-                saved.getOrderStatus().name(),
+                order.getId(),
+                order.getTableNumber(),
+                order.getAmountOfGuests(),
+                order.getOrderStatus().name(),
                 categoryDtos
         );
     }
@@ -85,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
             FoodItem foodItem = foodItemRepository.findById(request.itemId())
                     .orElseThrow(() -> new FoodItemNotFoundException("Food item not found with id: " + request.itemId()));
 
-            if (foodItem.isItMeat() && request.meatTemperature() == null){
+            if (foodItem.isItMeat() && request.meatTemperature() == null) {
                 throw new MissingMeatTemperatureException("Meat item requires a meat temperature");
             }
 
@@ -99,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
                 orderItem = new OrderItem();
                 orderItem.setFoodItem(foodItem);
                 orderItem.setQuantity(1);
-                if (foodItem.isItMeat()){
+                if (foodItem.isItMeat()) {
                     orderItem.setMeatTemperature(request.meatTemperature());
                 }
                 order.addItem(orderItem);
@@ -116,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
                     .findFirst()
                     .orElse(null);
 
-            if (orderItem == null){
+            if (orderItem == null) {
                 orderItem = new OrderItem();
                 orderItem.setDrinkItem(drinkItem);
                 orderItem.setQuantity(1);

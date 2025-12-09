@@ -5,14 +5,12 @@ import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.model.order.MeatTemperature;
 import org.example.backendpos.model.order.Order;
 import org.example.backendpos.service.OrderService;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/service")
 public class OrderController {
 
     private final OrderService orderService;
@@ -21,18 +19,21 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PostMapping("/tableview/{tableNumber}")
     public StartOrderResponse startOrder(
-            @RequestParam int tableNumber,
+            @PathVariable int tableNumber,
             @RequestParam int amountOfGuests
     ){
         return orderService.startOrderResponse(tableNumber, amountOfGuests);
     }
 
+    @PostMapping("/orders/{orderId}/items")
     public Order addItemToOrder(@PathVariable Long orderId,
                                 @RequestBody AddOrderItemRequest request){
         return orderService.addItemToOrder(orderId, request);
     }
 
+    @GetMapping("/orders/meat-temperatures")
     public MeatTemperature[] getMeatTemperatures() {
         return MeatTemperature.values();
     }
