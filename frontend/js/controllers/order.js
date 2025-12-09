@@ -19,10 +19,10 @@ let orderItems = [];
 
 window.addEventListener("DOMContentLoaded", initOrderPage);
 
-function initOrderPage(){
+async function initOrderPage(){
     const stored = sessionStorage.getItem("currentOrder");
     if(!stored){
-        errorEl.textContent = "Ingen aktiv ordre funder. Gå tilbage til oversigen.";
+        errorEl.textContent = "Ingen aktiv ordre fundet. Gå tilbage til oversigten.";
         return;
     }
 
@@ -39,7 +39,9 @@ function initOrderPage(){
             selectedCategoryId = categories[0].id;
         }
 
-        orderItems = [];
+        // 🔹 NEW: fetch order details (items) from backend
+        const details = await fetchOrderDetails(orderId);
+        orderItems = details.items || [];
 
         renderHeader();
         renderOrderMeta();
@@ -48,9 +50,10 @@ function initOrderPage(){
         renderItems();
     } catch (e) {
         console.error(e);
-        errorEl.textContent = "Fejl ved indlæsning af ordreData."
+        errorEl.textContent = "Fejl ved indlæsning af ordredata.";
     }
 }
+
 
 function renderHeader(){
     orderTableInfoEl.textContent = `Bord ${tableNumber}`;
@@ -250,3 +253,24 @@ async function addItemToOrder(itemId, itemType, meatTemperature = null) {
 backToOverviewBtn.addEventListener("click", () => {
     window.location.href = "overview.html";
 });
+
+
+// ----- Send button -----
+
+const sendOrderBtn = document.getElementById("send-order-btn");
+
+sendOrderBtn.addEventListener("click", () => {
+    if (!orderId) return;
+    // Placeholder behaviour – later you can call a /send endpoint.
+    console.log("Send order clicked for orderId =", orderId);
+    alert("Ordre sendt (dummy handling – implement backend senere)");
+});
+
+async function fetchOrderDetails(orderId) {
+    const res = await fetch(`${API_BASE}/service/orders/${orderId}`);
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Kunne ikke hente ordredata");
+    }
+    return await res.json(); // AddItemResponse
+}

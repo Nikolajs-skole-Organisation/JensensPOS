@@ -22,13 +22,16 @@ public class OrderServiceImpl implements OrderService {
     private final CategoryRepository categoryRepository;
     private final DrinkItemRepository drinkItemRepository;
     private final FoodItemRepository foodItemRepository;
+    private final AddItemResponseMapper addItemResponseMapper;
 
     public OrderServiceImpl(OrderRepository orderRepository, CategoryRepository categoryRepository,
-                            DrinkItemRepository drinkItemRepository, FoodItemRepository foodItemRepository) {
+                            DrinkItemRepository drinkItemRepository, FoodItemRepository foodItemRepository,
+                            AddItemResponseMapper addItemResponseMapper) {
         this.orderRepository = orderRepository;
         this.categoryRepository = categoryRepository;
         this.drinkItemRepository = drinkItemRepository;
         this.foodItemRepository = foodItemRepository;
+        this.addItemResponseMapper = addItemResponseMapper;
     }
 
     public StartOrderResponse startOrderResponse(int tableNumber, int amountOfGuests) {
@@ -78,7 +81,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Transactional
-    public Order addItemToOrder(Long orderId, AddOrderItemRequest request) {
+    @Override
+    public AddItemResponse addItemToOrder(Long orderId, AddOrderItemRequest request) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
 
@@ -109,7 +113,8 @@ public class OrderServiceImpl implements OrderService {
             } else {
                 orderItem.incrementQuantity();
             }
-        } else {
+
+        } else { // DRINK
             DrinkItem drinkItem = drinkItemRepository.findById(request.itemId())
                     .orElseThrow(() -> new DrinkItemNotFoundException("Drink item not found with id: " + request.itemId()));
 
@@ -129,6 +134,32 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        return addItemResponseMapper.toDto(saved);
+    }
+
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
+    }
+
+    @Override
+    public AddItemResponse getOpenOrderForTable(int tableNumber) {
+        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .orElseThrow(() -> new OrderNotFoundException(
+                        "No open order for table " + tableNumber
+                ));
+
+        return addItemResponseMapper.toDto(order);
+    }
+
+    @Override
+    public AddItemResponse getOrderDetails(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
+
+        return addItemResponseMapper.toDto(order);
     }
 }
