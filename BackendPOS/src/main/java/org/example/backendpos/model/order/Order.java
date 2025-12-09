@@ -31,6 +31,9 @@ public class Order {
     private OrderStatus orderStatus;
 
     public void addItem(OrderItem item){
+        if (items == null) {
+            items = new ArrayList<>();
+        }
         items.add(item);
         item.setOrder(this);
     }

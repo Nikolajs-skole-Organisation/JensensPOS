@@ -188,7 +188,7 @@ public class InitData implements CommandLineRunner {
         );
 
         FoodItem iceCream = new FoodItem(
-                "Isdessert",
+                "Is dessert",
                 59.0,
                 desserter,
                 null,
@@ -198,7 +198,7 @@ public class InitData implements CommandLineRunner {
         );
 
         FoodItem brownie = new FoodItem(
-                "Chokoladebrownie",
+                "Chokolade brownie",
                 69.0,
                 desserter,
                 null,
