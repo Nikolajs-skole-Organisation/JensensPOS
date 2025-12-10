@@ -2,6 +2,12 @@ package org.example.backendpos.config;
 
 import org.example.backendpos.model.RestaurantTable;
 import org.example.backendpos.model.TableStatus;
+import org.example.backendpos.model.order.Category;
+import org.example.backendpos.model.order.DrinkItem;
+import org.example.backendpos.model.order.FoodItem;
+import org.example.backendpos.repository.CategoryRepository;
+import org.example.backendpos.repository.DrinkItemRepository;
+import org.example.backendpos.repository.FoodItemRepository;
 import org.example.backendpos.repository.RestaurantTableRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -12,15 +18,26 @@ import java.util.List;
 public class InitData implements CommandLineRunner {
 
     private final RestaurantTableRepository restaurantTableRepository;
+    private final CategoryRepository categoryRepository;
+    private final FoodItemRepository foodItemRepository;
+    private final DrinkItemRepository drinkItemRepository;
 
-    public InitData(RestaurantTableRepository restaurantTableRepository) {
+    public InitData(RestaurantTableRepository restaurantTableRepository, CategoryRepository categoryRepository,
+                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository) {
         this.restaurantTableRepository = restaurantTableRepository;
+        this.categoryRepository = categoryRepository;
+        this.foodItemRepository = foodItemRepository;
+        this.drinkItemRepository = drinkItemRepository;
     }
 
     @Override
     public void run(String... args) {
 
+        initTables();
+        initMenu();
+    }
 
+    private void initTables(){
         if (restaurantTableRepository.count() > 0) {
             return;
         }
@@ -87,6 +104,192 @@ public class InitData implements CommandLineRunner {
         restaurantTableRepository.saveAll(restaurantTables);
     }
 
+    private void initMenu() {
+        // If categories already exist, assume menu is seeded
+        if (categoryRepository.count() > 0) {
+            return;
+        }
+
+        // ----- Categories -----
+        Category forretter      = new Category();
+        forretter.setName("FORRETTER");
+
+        Category hovedretter    = new Category();
+        hovedretter.setName("HOVEDRETTER");
+
+        Category desserter      = new Category();
+        desserter.setName("DESSERTER");
+
+        Category drinks         = new Category();
+        drinks.setName("DRINKS");
+
+        Category gratis         = new Category();
+        gratis.setName("GRATIS");
+
+        Category tilbud         = new Category();
+        tilbud.setName("TILBUD");
+
+        Category personaleRetter = new Category();
+        personaleRetter.setName("PERSONALE RETTER");
+
+        categoryRepository.saveAll(List.of(
+                forretter, hovedretter, desserter, drinks, gratis, tilbud, personaleRetter
+        ));
+
+        // ----- Food items -----
+        FoodItem garlicBread = new FoodItem(
+                "Hvidløgsbrød",
+                39.0,
+                forretter,
+                null,
+                false,
+                true,
+                false
+        );
+
+        FoodItem nachos = new FoodItem(
+                "Nachos med ost",
+                69.0,
+                forretter,
+                null,
+                false,
+                true,
+                false
+        );
+
+        FoodItem steak = new FoodItem(
+                "Oksebøf 250g",
+                199.0,
+                hovedretter,
+                null,
+                true,   // isItMeat
+                false,  // availableForTakeaway
+                false   // availableForPersonnel
+        );
+
+        FoodItem burger = new FoodItem(
+                "Jensens Burger",
+                149.0,
+                hovedretter,
+                null,
+                true,
+                true,
+                false
+        );
+
+        FoodItem kidsPasta = new FoodItem(
+                "Børnepasta",
+                79.0,
+                hovedretter,
+                null,
+                false,
+                true,
+                false
+        );
+
+        FoodItem iceCream = new FoodItem(
+                "Is dessert",
+                59.0,
+                desserter,
+                null,
+                false,
+                true,
+                false
+        );
+
+        FoodItem brownie = new FoodItem(
+                "Chokolade brownie",
+                69.0,
+                desserter,
+                null,
+                false,
+                true,
+                false
+        );
+
+        // Gratis / personale / tilbud examples
+        FoodItem brødOgSmør = new FoodItem(
+                "Brød og smør",
+                0.0,
+                gratis,
+                null,
+                false,
+                false,
+                false
+        );
+
+        FoodItem personaleRet = new FoodItem(
+                "Dagens personaleret",
+                0.0,
+                personaleRetter,
+                null,
+                true,
+                false,
+                true
+        );
+
+        FoodItem dagensTilbud = new FoodItem(
+                "Dagens tilbudsret",
+                99.0,
+                tilbud,
+                null,
+                true,
+                false,
+                false
+        );
+
+        foodItemRepository.saveAll(List.of(
+                garlicBread,
+                nachos,
+                steak,
+                burger,
+                kidsPasta,
+                iceCream,
+                brownie,
+                brødOgSmør,
+                personaleRet,
+                dagensTilbud
+        ));
+
+        // ----- Drink items -----
+        DrinkItem cola = new DrinkItem(
+                "Coca Cola 0,5L",
+                32.0,
+                drinks
+        );
+
+        DrinkItem colaZero = new DrinkItem(
+                "Coca Cola Zero 0,5L",
+                32.0,
+                drinks
+        );
+
+        DrinkItem fadøl = new DrinkItem(
+                "Fadøl 0,5L",
+                49.0,
+                drinks
+        );
+
+        DrinkItem vand = new DrinkItem(
+                "Kildevand",
+                29.0,
+                drinks
+        );
+
+        DrinkItem husetsVin = new DrinkItem(
+                "Husets rødvin glas",
+                59.0,
+                drinks
+        );
+
+        drinkItemRepository.saveAll(List.of(
+                cola,
+                colaZero,
+                fadøl,
+                vand,
+                husetsVin
+        ));
     }
+}
 
 

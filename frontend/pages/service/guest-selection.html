@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vælg antal gæster</title>
+    <link rel="stylesheet" href="../../css/guest-selection.css">
+</head>
+<body>
+    
+    <div class="guest-container">
+        <h1 id="guest-title">Bord ?</h1>
+
+        <div class="guest-display" id="guest-display">0</div>
+
+        <div class="guest-keypad" id="guest-keypad">
+            <button class="key-btn" data-key="7">7</button>
+            <button class="key-btn" data-key="8">8</button>
+            <button class="key-btn" data-key="9">9</button>
+            <button class="key-btn" data-key="4">4</button>
+            <button class="key-btn" data-key="5">5</button>
+            <button class="key-btn" data-key="6">6</button>
+            <button class="key-btn" data-key="1">1</button>
+            <button class="key-btn" data-key="2">2</button>
+            <button class="key-btn" data-key="3">3</button>
+            <div></div>
+            <button class="key-btn zero" data-key="0">0</button>
+            <div></div>
+        </div>
+
+        <div class="guest-actions">
+            <button id="guest-back-btn" type="button" class="secondary">Tilbage</button>
+            <button id="guest-delete-btn" type="button" class="secondary">Slet</button>
+            <button id="guest-submit-btn" type="button" class="primary">Fortsæt</button>
+        </div>
+
+        <div id="guest-error" class="guest-error"></div>
+    </div>
+
+    <script src="../../js/controllers/guest-selection.js"></script>
+</body>
+</html>

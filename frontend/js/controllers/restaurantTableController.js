@@ -160,7 +160,16 @@ function updateCellSize(grid) {
 
 function handleTableClick(table) {
   console.log("Table clicked:", table.tableNumber, "status:", table.status);
-  // Implementer metode til at starte ordre
+  
+  const status = (table.status || "FREE").toUpperCase();
+
+  if(status === "BLOCKED"){
+    alert("Dette bord er blokeret og kan ikke åbnet.")
+    return;
+  }
+
+ window.location.href = `guest-selection.html?tableNumber=${table.tableNumber}`;
+
 }
 
 // ----- Hardcoded walls -----

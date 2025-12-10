@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bestilling</title>
+    <link rel="stylesheet" href="../../css/order.css">
+</head>
+<body>
+
+<header class="order-header">
+    <div id="order-table-info">Bord ?</div>
+    <div id="order-status-info"></div>
+    <button id="back-to-overview-btn" class="btn small">Til oversigt</button>
+</header>
+
+<main class="order-layout">
+    <!-- LEFT: active order -->
+    <section class="panel panel-left">
+        <h2>Aktuel ordre</h2>
+        <div id="order-meta"></div>
+        <ul id="order-items-list"></ul>
+        <button id="send-order-btn" class="send-btn">Send ordre</button>
+    </section>
+
+    <!-- MIDDLE: categories (narrow) -->
+    <section class="panel panel-middle">
+        <h3>Kategorier</h3>
+        <div id="category-list"></div>
+    </section>
+
+    <!-- RIGHT: items for selected category -->
+    <section class="panel panel-right">
+        <h3 id="items-title">Vælg en kategori</h3>
+        <div id="items-container"></div>
+    </section>
+</main>
+
+<div id="order-error" class="order-error"></div>
+
+<script src="../../js/controllers/order.js"></script>
+</body>
+</html>
