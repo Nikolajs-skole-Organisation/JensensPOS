@@ -50,6 +50,14 @@ public class OrderServiceImpl implements OrderService {
                     return orderRepository.save(newOrder);
                 });
 
+        restaurantTableRepository.findByTableNumber(tableNumber)
+                .ifPresent(table -> {
+                    if (table.getStatus() != TableStatus.BLOCKED) {
+                        table.setStatus(TableStatus.OCCUPIED);
+                        restaurantTableRepository.save(table);
+                    }
+                });
+
         List<Category> categories = categoryRepository.findAll();
 
         List<CategoryDto> categoryDtos = categories.stream()
