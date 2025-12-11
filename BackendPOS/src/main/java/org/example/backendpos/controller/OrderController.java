@@ -2,6 +2,7 @@ package org.example.backendpos.controller;
 
 import org.example.backendpos.dto.AddItemResponse;
 import org.example.backendpos.dto.AddOrderItemRequest;
+import org.example.backendpos.dto.ReceiptDto;
 import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.model.order.MeatTemperature;
 import org.example.backendpos.service.OrderService;
@@ -44,5 +45,14 @@ public class OrderController {
     @GetMapping("/orders/{orderId}")
     public AddItemResponse getOrder(@PathVariable Long orderId) {
         return orderService.getOrderDetails(orderId);
+    }
+    @GetMapping("/orders/{orderId}/receipt")
+    public ReceiptDto getReceipt(@PathVariable Long orderId) {
+        return orderService.calculateReceipt(orderId);
+    }
+
+    @PostMapping("/orders/{orderId}/pay")
+    public ReceiptDto payOrder(@PathVariable Long orderId) {
+        return orderService.payOrder(orderId);
     }
 }
