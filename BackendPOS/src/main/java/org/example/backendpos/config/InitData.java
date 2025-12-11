@@ -5,9 +5,13 @@ import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.Category;
 import org.example.backendpos.model.order.DrinkItem;
 import org.example.backendpos.model.order.FoodItem;
+import org.example.backendpos.model.order.Order;
+import org.example.backendpos.model.order.OrderItem;
+import org.example.backendpos.model.order.OrderStatus;
 import org.example.backendpos.repository.CategoryRepository;
 import org.example.backendpos.repository.DrinkItemRepository;
 import org.example.backendpos.repository.FoodItemRepository;
+import org.example.backendpos.repository.OrderRepository;
 import org.example.backendpos.repository.RestaurantTableRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -21,13 +25,15 @@ public class InitData implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final FoodItemRepository foodItemRepository;
     private final DrinkItemRepository drinkItemRepository;
+    private final OrderRepository orderRepository;
 
     public InitData(RestaurantTableRepository restaurantTableRepository, CategoryRepository categoryRepository,
-                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository) {
+                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository, OrderRepository orderRepository) {
         this.restaurantTableRepository = restaurantTableRepository;
         this.categoryRepository = categoryRepository;
         this.foodItemRepository = foodItemRepository;
         this.drinkItemRepository = drinkItemRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -35,6 +41,7 @@ public class InitData implements CommandLineRunner {
 
         initTables();
         initMenu();
+        initOrder();
     }
 
     private void initTables(){
@@ -290,6 +297,26 @@ public class InitData implements CommandLineRunner {
                 husetsVin
         ));
     }
+
+    private void initOrder() {
+        int tableNumber = 5;
+
+        boolean orderExists = orderRepository
+                .findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .isPresent();
+
+        if (orderExists) {
+            return;
+        }
+
+        Order order = new Order();
+        order.setTableNumber(tableNumber);
+        order.setAmountOfGuests(2);
+        order.setOrderStatus(OrderStatus.OPEN);
+
+        orderRepository.save(order);
+    }
 }
+
 
 
