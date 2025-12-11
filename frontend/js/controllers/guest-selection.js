@@ -16,6 +16,15 @@ function updateDisplay() {
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
+    // --- 0. Check om der er logget ind ---
+    const storedEmployee = sessionStorage.getItem("currentEmployee");
+    if (!storedEmployee) {
+        window.location.href = "login.html";
+        return;
+    }
+    const employee = JSON.parse(storedEmployee);
+    console.log("Guest selection opened by:", employee.name, employee.role);
+
     // --- 1. Find tableNumber from URL ---
     const params = new URLSearchParams(window.location.search);
     if (params.has("tableNumber")) {

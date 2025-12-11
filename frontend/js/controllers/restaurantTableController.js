@@ -6,6 +6,16 @@ let lastGrid = null;
 window.addEventListener("DOMContentLoaded", initRestaurantTableController);
 
 async function initRestaurantTableController() {
+  const storedEmployee = sessionStorage.getItem("currentEmployee");
+  if (!storedEmployee) {
+    // ingen login -> send til login
+    window.location.href = "login.html";
+    return;
+  }
+
+  const employee = JSON.parse(storedEmployee);
+  console.log("Logged in as:", employee.name, "role:", employee.role);
+
   dom = mapDomElements();
   await reloadAndRender();
 }
