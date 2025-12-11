@@ -1,0 +1,66 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2dfca;
+    text-align: center;
+    padding-top: 40px;
+}
+
+h1 {
+    font-size: 48px;
+    margin-bottom: 30px;
+}
+
+#login-display {
+    font-size: 40px;
+    margin-bottom: 25px;
+    letter-spacing: 10px;
+    font-weight: bold;
+    min-height: 45px;
+}
+
+#login-keypad {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-width: 260px;
+    margin: 0 auto 20px auto;
+}
+
+.key-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    border: 1px solid #999;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.key-btn:hover {
+    background-color: #e3d5c8;
+}
+
+#login-clear-btn,
+#login-submit-btn {
+    width: 120px;
+    height: 40px;
+    margin: 5px;
+    font-size: 18px;
+    border-radius: 6px;
+    border: 1px solid #666;
+    background-color: white;
+    cursor: pointer;
+}
+
+#login-clear-btn:hover,
+#login-submit-btn:hover {
+    background-color: #e3d5c8;
+}
+
+.error {
+    font-size: 20px;
+    color: #000;
+    margin-top: 20px;
+}
