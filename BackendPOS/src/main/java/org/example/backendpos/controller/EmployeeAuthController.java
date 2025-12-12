@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/service/auth")
-@CrossOrigin(origins = "http://localhost:5500")
 public class EmployeeAuthController {
     private final EmployeeService employeeService;
 
