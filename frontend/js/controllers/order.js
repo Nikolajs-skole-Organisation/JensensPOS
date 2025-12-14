@@ -20,6 +20,14 @@ let orderItems = [];
 window.addEventListener("DOMContentLoaded", initOrderPage);
 
 async function initOrderPage(){
+    const storedEmployee = sessionStorage.getItem("currentEmployee");
+    if (!storedEmployee) {
+        window.location.href = "login.html";
+        return;
+    }
+    const employee = JSON.parse(storedEmployee);
+    console.log("Order page opened by:", employee.name, employee.role);
+
     const stored = sessionStorage.getItem("currentOrder");
     if(!stored){
         errorEl.textContent = "Ingen aktiv ordre fundet. Gå tilbage til oversigten.";
