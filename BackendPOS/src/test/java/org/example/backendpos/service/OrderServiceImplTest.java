@@ -380,6 +380,7 @@ class OrderServiceImplTest {
         oi.setId(1L);
         oi.setHasBeenSent(true);
         oi.setSentAt(Instant.parse("2025-01-02T00:00:00Z"));
+        oi.setOrder(order);
 
         when(orderItemRepository.findKitchenItemsAfter(since, lastId)).thenReturn(List.of(oi));
 
