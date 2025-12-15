@@ -376,6 +376,8 @@ class OrderServiceImplTest {
         Instant since = Instant.parse("2025-01-01T00:00:00Z");
         long lastId = 0L;
 
+        Order order = new Order(1L, 4);
+        
         OrderItem oi = new OrderItem();
         oi.setId(1L);
         oi.setHasBeenSent(true);
