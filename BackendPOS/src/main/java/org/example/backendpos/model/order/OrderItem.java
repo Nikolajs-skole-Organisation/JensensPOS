@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "order_item")
 @Getter
@@ -36,6 +38,13 @@ public class OrderItem {
     @Enumerated(EnumType.STRING)
     @Column(name = "meat_temperature")
     private MeatTemperature meatTemperature;
+
+    @Column(name = "has_been_sent")
+    private boolean hasBeenSent;
+
+    private Instant sentAt;
+
+    private Instant bumpedAt;
 
     public void incrementQuantity(){
         quantity++;

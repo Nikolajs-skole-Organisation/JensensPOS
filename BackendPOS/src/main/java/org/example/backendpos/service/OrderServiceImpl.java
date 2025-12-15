@@ -6,13 +6,13 @@ import org.example.backendpos.exception.FoodItemNotFoundException;
 import org.example.backendpos.exception.MissingMeatTemperatureException;
 import org.example.backendpos.exception.OrderNotFoundException;
 import org.example.backendpos.model.order.*;
-import org.example.backendpos.repository.CategoryRepository;
-import org.example.backendpos.repository.DrinkItemRepository;
-import org.example.backendpos.repository.FoodItemRepository;
-import org.example.backendpos.repository.OrderRepository;
+import org.example.backendpos.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,15 +23,17 @@ public class OrderServiceImpl implements OrderService {
     private final DrinkItemRepository drinkItemRepository;
     private final FoodItemRepository foodItemRepository;
     private final AddItemResponseMapper addItemResponseMapper;
+    private final OrderItemRepository orderItemRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository, CategoryRepository categoryRepository,
                             DrinkItemRepository drinkItemRepository, FoodItemRepository foodItemRepository,
-                            AddItemResponseMapper addItemResponseMapper) {
+                            AddItemResponseMapper addItemResponseMapper, OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
         this.categoryRepository = categoryRepository;
         this.drinkItemRepository = drinkItemRepository;
         this.foodItemRepository = foodItemRepository;
         this.addItemResponseMapper = addItemResponseMapper;
+        this.orderItemRepository = orderItemRepository;
     }
 
     public StartOrderResponse startOrderResponse(int tableNumber, int amountOfGuests) {
@@ -42,7 +44,7 @@ public class OrderServiceImpl implements OrderService {
                     newOrder.setTableNumber(tableNumber);
                     newOrder.setAmountOfGuests(amountOfGuests);
                     newOrder.setOrderStatus(OrderStatus.OPEN);
-                    return  orderRepository.save(newOrder);
+                    return orderRepository.save(newOrder);
                 });
 
         List<Category> categories = categoryRepository.findAll();
@@ -97,8 +99,14 @@ public class OrderServiceImpl implements OrderService {
             }
 
             orderItem = order.getItems().stream()
-                    .filter(oi -> oi.getFoodItem() != null &&
-                            oi.getFoodItem().getId().equals(foodItem.getId()))
+                    .filter(oi ->
+                            !oi.isHasBeenSent() &&
+                                    oi.getFoodItem() != null &&
+                                    oi.getFoodItem().getId().equals(foodItem.getId()) &&
+                                    (foodItem.isItMeat()
+                                            ? oi.getMeatTemperature() == request.meatTemperature()
+                                            : true)
+                    )
                     .findFirst()
                     .orElse(null);
 
@@ -109,6 +117,7 @@ public class OrderServiceImpl implements OrderService {
                 if (foodItem.isItMeat()) {
                     orderItem.setMeatTemperature(request.meatTemperature());
                 }
+                orderItem.setHasBeenSent(false);
                 order.addItem(orderItem);
             } else {
                 orderItem.incrementQuantity();
@@ -119,10 +128,14 @@ public class OrderServiceImpl implements OrderService {
                     .orElseThrow(() -> new DrinkItemNotFoundException("Drink item not found with id: " + request.itemId()));
 
             orderItem = order.getItems().stream()
-                    .filter(oi -> oi.getDrinkItem() != null &&
-                            oi.getDrinkItem().getId().equals(drinkItem.getId()))
+                    .filter(oi ->
+                            !oi.isHasBeenSent() &&
+                                    oi.getDrinkItem() != null &&
+                                    oi.getDrinkItem().getId().equals(drinkItem.getId())
+                    )
                     .findFirst()
                     .orElse(null);
+
 
             if (orderItem == null) {
                 orderItem = new OrderItem();
@@ -162,4 +175,40 @@ public class OrderServiceImpl implements OrderService {
 
         return addItemResponseMapper.toDto(order);
     }
+
+    @Override
+    @Transactional
+    public void sendToKitchenAndBar(int tableNumber) {
+        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .orElseThrow(() -> new OrderNotFoundException("No open order for table " + tableNumber));
+
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+        for (OrderItem item : order.getItems()) {
+            if (!item.isHasBeenSent()) {
+                item.setHasBeenSent(true);
+                item.setSentAt(now);
+            }
+        }
+
+        orderRepository.save(order);
+    }
+
+
+    @Override
+    public List<KitchenOrderItemDto> getKitchenItems(Instant since, long lastId) {
+        return orderItemRepository.findKitchenItemsAfter(since, lastId)
+                .stream()
+                .map(KitchenOrderItemDto::from)
+                .toList();
+    }
+
+    @Transactional
+    public void bumpKitchenTicket(int tableNumber) {
+        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .orElseThrow(() -> new OrderNotFoundException("No open order for table " + tableNumber));
+
+        orderItemRepository.bumpKitchenItems(order.getId(), Instant.now().truncatedTo(ChronoUnit.MILLIS));
+    }
+
 }

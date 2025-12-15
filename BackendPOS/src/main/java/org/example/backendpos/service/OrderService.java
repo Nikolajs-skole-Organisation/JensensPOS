@@ -1,9 +1,10 @@
 package org.example.backendpos.service;
 
-import org.example.backendpos.dto.AddItemResponse;
-import org.example.backendpos.dto.AddOrderItemRequest;
-import org.example.backendpos.dto.StartOrderResponse;
+import org.example.backendpos.dto.*;
 import org.example.backendpos.model.order.Order;
+
+import java.time.Instant;
+import java.util.List;
 
 public interface OrderService {
 
@@ -16,4 +17,9 @@ public interface OrderService {
     Order getOrderById(Long orderId);
 
     AddItemResponse getOrderDetails(Long orderId);
+
+    void sendToKitchenAndBar(int tableNumber);
+
+    List<KitchenOrderItemDto> getKitchenItems(Instant since, long lastId);
+    void bumpKitchenTicket(int tableNumber);
 }
