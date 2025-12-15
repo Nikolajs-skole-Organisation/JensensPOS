@@ -25,7 +25,7 @@ public class Order {
     private String nameOfServer;
     private int tableNumber;
     private int amountOfGuests;
-    private boolean hasBeenSent;
+    private boolean hasBeenMade;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;

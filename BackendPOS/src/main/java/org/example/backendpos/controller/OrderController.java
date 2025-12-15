@@ -5,6 +5,7 @@ import org.example.backendpos.dto.AddOrderItemRequest;
 import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.model.order.MeatTemperature;
 import org.example.backendpos.service.OrderService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,5 +45,10 @@ public class OrderController {
     @GetMapping("/orders/{orderId}")
     public AddItemResponse getOrder(@PathVariable Long orderId) {
         return orderService.getOrderDetails(orderId);
+    }
+
+    @PostMapping("/tables/{tableNumber}/send")
+    public void sendToKitchenAndBar(@PathVariable int tableNumber){
+        orderService.sendToKitchenAndBar(tableNumber);
     }
 }
