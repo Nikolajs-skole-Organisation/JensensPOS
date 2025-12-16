@@ -1,3 +1,5 @@
+import { getReceipt, payOrder } from "../services/orderApi.js";
+
 const orderTableInfoEl  = document.getElementById("order-table-info");
 const orderStatusInfoEl = document.getElementById("order-status-info");
 const orderMetaEl       = document.getElementById("order-meta");
@@ -7,6 +9,7 @@ const itemsTitleEl      = document.getElementById("items-title");
 const itemsContainerEl  = document.getElementById("items-container");
 const errorEl           = document.getElementById("order-error");
 const backToOverviewBtn = document.getElementById("back-to-overview-btn");
+const payBtn = document.getElementById("pay-btn");
 const API_BASE = "http://localhost:8080";
 
 let orderId = null;
@@ -274,3 +277,39 @@ async function fetchOrderDetails(orderId) {
     }
     return await res.json(); // AddItemResponse
 }
+
+payBtn.addEventListener("click", async () => {
+    if (!orderId) return;
+
+    try {
+        const receipt = await getReceipt(orderId);
+
+        if (!receipt.lines || receipt.lines.length === 0) {
+            alert("Ordren indeholder ingen varer.");
+            return;
+        }
+
+        const receiptText =
+            receipt.lines
+                .map(l => `${l.quantity} x ${l.name} = ${l.lineTotal} kr`)
+                .join("\n")
+            + `\n\nTOTAL: ${receipt.total} kr`;
+
+        const confirmed = confirm(
+            receiptText + "\n\nVil du gennemføre betalingen?"
+        );
+
+        if (!confirmed) return;
+
+        await payOrder(orderId);
+
+        alert("Betaling gennemført.");
+
+        sessionStorage.removeItem("currentOrder");
+        window.location.href = "overview.html";
+
+    } catch (e) {
+        console.error(e);
+        alert("Fejl ved betaling: " + e.message);
+    }
+});
