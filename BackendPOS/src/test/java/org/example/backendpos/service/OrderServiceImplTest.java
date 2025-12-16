@@ -1,67 +1,51 @@
 package org.example.backendpos.service;
 
-import org.example.backendpos.dto.AddItemResponseMapper;
-import org.example.backendpos.dto.ReceiptDto;
-import org.example.backendpos.dto.ReceiptLineDto;
-import org.example.backendpos.exception.OrderNotFoundException;
-import org.example.backendpos.model.RestaurantTable;
-import org.example.backendpos.model.TableStatus;
-import org.example.backendpos.model.order.DrinkItem;
-import org.example.backendpos.model.order.FoodItem;
-import org.example.backendpos.model.order.Order;
-import org.example.backendpos.model.order.OrderItem;
-import org.example.backendpos.model.order.OrderStatus;
-import org.example.backendpos.repository.CategoryRepository;
-import org.example.backendpos.repository.DrinkItemRepository;
-import org.example.backendpos.repository.FoodItemRepository;
-import org.example.backendpos.repository.OrderRepository;
-import org.example.backendpos.repository.RestaurantTableRepository;
 import org.example.backendpos.dto.*;
 import org.example.backendpos.exception.*;
+import org.example.backendpos.model.RestaurantTable;
+import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.*;
 import org.example.backendpos.repository.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceImplTest {
 
     @Mock private OrderRepository orderRepository;
-    @Mock OrderRepository orderRepository;
-    @Mock CategoryRepository categoryRepository;
-    @Mock DrinkItemRepository drinkItemRepository;
-    @Mock FoodItemRepository foodItemRepository;
-    @Mock AddItemResponseMapper addItemResponseMapper;
-    @Mock OrderItemRepository orderItemRepository;
-
-    @InjectMocks OrderServiceImpl service;
-
+    @Mock private CategoryRepository categoryRepository;
+    @Mock private DrinkItemRepository drinkItemRepository;
+    @Mock private FoodItemRepository foodItemRepository;
+    @Mock private AddItemResponseMapper addItemResponseMapper;
+    @Mock private OrderItemRepository orderItemRepository;
     @Mock private RestaurantTableRepository restaurantTableRepository;
+
+    @InjectMocks
+    private OrderServiceImpl service;
+
+    // ---------- helpers ----------
+
     private Order openOrder(long id, int table) {
         Order o = new Order();
-        o.setId(id); // if your entity doesn’t have setId, remove and rely on repo return
+        // If your entity doesn't allow setId, remove this and rely on repo-returned IDs
+        o.setId(id);
         o.setTableNumber(table);
         o.setAmountOfGuests(2);
         o.setOrderStatus(OrderStatus.OPEN);
         return o;
     }
 
-    @InjectMocks
-    private OrderServiceImpl orderService;
     private FoodItem food(long id, String name, boolean isMeat) {
         FoodItem f = new FoodItem();
         f.setId(id);
@@ -131,7 +115,6 @@ class OrderServiceImplTest {
         when(orderRepository.findByTableNumberAndOrderStatus(7, OrderStatus.OPEN))
                 .thenReturn(Optional.empty());
 
-        // when saving, return order with id
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(99L);
@@ -162,12 +145,10 @@ class OrderServiceImplTest {
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(foodItemRepository.findById(10L)).thenReturn(Optional.of(bread));
-
-        Order saved = order;
-        when(orderRepository.save(any(Order.class))).thenReturn(saved);
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         AddItemResponse dto = mock(AddItemResponse.class);
-        when(addItemResponseMapper.toDto(saved)).thenReturn(dto);
+        when(addItemResponseMapper.toDto(order)).thenReturn(dto);
 
         AddOrderItemRequest req = new AddOrderItemRequest(10L, ItemType.FOOD, null);
 
@@ -185,7 +166,6 @@ class OrderServiceImplTest {
         Order order = openOrder(1L, 4);
         FoodItem bread = food(10L, "Bread", false);
 
-        // already sent line
         OrderItem sentLine = foodItemLine(bread, 2, true, null);
         order.addItem(sentLine);
 
@@ -193,8 +173,7 @@ class OrderServiceImplTest {
         when(foodItemRepository.findById(10L)).thenReturn(Optional.of(bread));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        AddItemResponse dto = mock(AddItemResponse.class);
-        when(addItemResponseMapper.toDto(order)).thenReturn(dto);
+        when(addItemResponseMapper.toDto(order)).thenReturn(mock(AddItemResponse.class));
 
         service.addItemToOrder(1L, new AddOrderItemRequest(10L, ItemType.FOOD, null));
 
@@ -228,7 +207,6 @@ class OrderServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(foodItemRepository.findById(20L)).thenReturn(Optional.of(steak));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-
         when(addItemResponseMapper.toDto(order)).thenReturn(mock(AddItemResponse.class));
 
         service.addItemToOrder(1L, new AddOrderItemRequest(20L, ItemType.FOOD, MeatTemperature.MEDIUM));
@@ -248,7 +226,6 @@ class OrderServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(foodItemRepository.findById(20L)).thenReturn(Optional.of(steak));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-
         when(addItemResponseMapper.toDto(order)).thenReturn(mock(AddItemResponse.class));
 
         service.addItemToOrder(1L, new AddOrderItemRequest(20L, ItemType.FOOD, MeatTemperature.WELL_DONE));
@@ -306,7 +283,7 @@ class OrderServiceImplTest {
                 () -> service.addItemToOrder(1L, new AddOrderItemRequest(999L, ItemType.DRINK, null)));
     }
 
-    // ---------------- getOrderById / getOpenOrderForTable / getOrderDetails ----------------
+    // ---------------- getOrderById ----------------
 
     @Test
     void getOrderById_returnsOrder() {
@@ -324,9 +301,10 @@ class OrderServiceImplTest {
         assertThrows(OrderNotFoundException.class, () -> service.getOrderById(1L));
     }
 
+    // ---------------- calculateReceipt ----------------
+
     @Test
     void calculateReceipt_returnsCorrectLinesAndTotal() {
-        // Arrange
         Order order = new Order();
         order.setId(100L);
         order.setTableNumber(5);
@@ -347,25 +325,14 @@ class OrderServiceImplTest {
 
         when(orderRepository.findById(100L)).thenReturn(Optional.of(order));
 
-        // Act
-        ReceiptDto receipt = orderService.calculateReceipt(100L);
+        ReceiptDto receipt = service.calculateReceipt(100L);
 
-        // Assert
         assertNotNull(receipt);
         assertEquals(100L, receipt.orderId());
         assertEquals(5, receipt.tableNumber());
-    void getOpenOrderForTable_mapsToDto() {
-        Order order = openOrder(1L, 4);
-        when(orderRepository.findByTableNumberAndOrderStatus(4, OrderStatus.OPEN))
-                .thenReturn(Optional.of(order));
-
         assertNotNull(receipt.lines());
         assertEquals(2, receipt.lines().size());
-        AddItemResponse dto = mock(AddItemResponse.class);
-        when(addItemResponseMapper.toDto(order)).thenReturn(dto);
-
         assertEquals(494.0, receipt.total(), 0.0001);
-        AddItemResponse res = service.getOpenOrderForTable(4);
 
         assertTrue(containsLine(receipt.lines(), "Oksebøf 250g", 2, 199.0, 398.0));
         assertTrue(containsLine(receipt.lines(), "Coca Cola 0,5L", 3, 32.0, 96.0));
@@ -373,12 +340,36 @@ class OrderServiceImplTest {
         verify(orderRepository).findById(100L);
         verifyNoMoreInteractions(orderRepository);
         verifyNoInteractions(restaurantTableRepository);
-        assertSame(dto, res);
     }
 
     @Test
     void calculateReceipt_throwsWhenOrderNotFound() {
         when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> service.calculateReceipt(999L));
+
+        verify(orderRepository).findById(999L);
+        verifyNoMoreInteractions(orderRepository);
+        verifyNoInteractions(restaurantTableRepository);
+    }
+
+    // ---------------- getOpenOrderForTable / getOrderDetails ----------------
+
+    @Test
+    void getOpenOrderForTable_mapsToDto() {
+        Order order = openOrder(1L, 4);
+        when(orderRepository.findByTableNumberAndOrderStatus(4, OrderStatus.OPEN))
+                .thenReturn(Optional.of(order));
+
+        AddItemResponse dto = mock(AddItemResponse.class);
+        when(addItemResponseMapper.toDto(order)).thenReturn(dto);
+
+        AddItemResponse res = service.getOpenOrderForTable(4);
+
+        assertSame(dto, res);
+    }
+
+    @Test
     void getOrderDetails_mapsToDto() {
         Order order = openOrder(1L, 4);
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
@@ -386,77 +377,44 @@ class OrderServiceImplTest {
         AddItemResponse dto = mock(AddItemResponse.class);
         when(addItemResponseMapper.toDto(order)).thenReturn(dto);
 
-        assertThrows(OrderNotFoundException.class, () -> orderService.calculateReceipt(999L));
         AddItemResponse res = service.getOrderDetails(1L);
 
-        verify(orderRepository).findById(999L);
-        verifyNoMoreInteractions(orderRepository);
-        verifyNoInteractions(restaurantTableRepository);
         assertSame(dto, res);
     }
 
     // ---------------- sendToKitchenAndBar ----------------
 
     @Test
-    void payOrder_setsOrderPaid_freesTable_andReturnsReceipt() {
-        // Arrange
-        Order order = new Order();
-        order.setId(200L);
-        order.setTableNumber(7);
-        order.setOrderStatus(OrderStatus.OPEN);
     void sendToKitchenAndBar_marksOnlyUnsentItemsAsSentAndSetsSentAt() {
         Order order = openOrder(1L, 4);
 
-        FoodItem burger = new FoodItem("Jensens Burger", 149.0, null, null, true, true, false);
-        OrderItem burgerItem = new OrderItem();
-        burgerItem.setFoodItem(burger);
-        burgerItem.setQuantity(2); // 298
-        order.setItems(List.of(burgerItem));
         FoodItem bread = food(10L, "Bread", false);
         OrderItem unsent = foodItemLine(bread, 1, false, null);
 
-        RestaurantTable table = new RestaurantTable(null, 7, 0, 0, 1, 1, TableStatus.OCCUPIED);
         FoodItem steak = food(20L, "Steak", true);
         OrderItem alreadySent = foodItemLine(steak, 1, true, MeatTemperature.MEDIUM);
         alreadySent.setSentAt(Instant.parse("2025-01-01T00:00:00Z"));
 
-        when(orderRepository.findById(200L)).thenReturn(Optional.of(order));
-        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
         order.addItem(unsent);
         order.addItem(alreadySent);
 
-        when(restaurantTableRepository.findByTableNumber(7)).thenReturn(Optional.of(table));
-        when(restaurantTableRepository.save(any(RestaurantTable.class))).thenAnswer(inv -> inv.getArgument(0));
         when(orderRepository.findByTableNumberAndOrderStatus(4, OrderStatus.OPEN))
                 .thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
-        // Act
-        ReceiptDto receipt = orderService.payOrder(200L);
         service.sendToKitchenAndBar(4);
 
-        // Assert
-        assertNotNull(receipt);
-        assertEquals(200L, receipt.orderId());
-        assertEquals(7, receipt.tableNumber());
-        assertEquals(298.0, receipt.total(), 0.0001);
-        assertTrue(containsLine(receipt.lines(), "Jensens Burger", 2, 149.0, 298.0));
         assertTrue(unsent.isHasBeenSent());
         assertNotNull(unsent.getSentAt(), "unsent should get sentAt");
 
-        assertEquals(OrderStatus.PAID, order.getOrderStatus());
-
-        assertEquals(TableStatus.FREE, table.getStatus());
         assertTrue(alreadySent.isHasBeenSent());
         assertEquals(Instant.parse("2025-01-01T00:00:00Z"), alreadySent.getSentAt(),
                 "already sent should not be overwritten");
 
-        verify(orderRepository, times(2)).findById(200L);
+        verify(orderRepository).findByTableNumberAndOrderStatus(4, OrderStatus.OPEN);
         verify(orderRepository).save(order);
     }
 
-        verify(restaurantTableRepository).findByTableNumber(7);
-        verify(restaurantTableRepository).save(table);
     @Test
     void sendToKitchenAndBar_throwsIfNoOpenOrder() {
         when(orderRepository.findByTableNumberAndOrderStatus(4, OrderStatus.OPEN))
@@ -465,15 +423,47 @@ class OrderServiceImplTest {
         assertThrows(OrderNotFoundException.class, () -> service.sendToKitchenAndBar(4));
     }
 
-    // ---------------- getKitchenItems ----------------
+    // ---------------- payOrder ----------------
+
+    @Test
+    void payOrder_setsOrderPaid_freesTable_andReturnsReceipt() {
+        Order order = new Order();
+        order.setId(200L);
+        order.setTableNumber(7);
+        order.setOrderStatus(OrderStatus.OPEN);
+
+        FoodItem burger = new FoodItem("Jensens Burger", 149.0, null, null, true, true, false);
+        OrderItem burgerItem = new OrderItem();
+        burgerItem.setFoodItem(burger);
+        burgerItem.setQuantity(2);
+        order.setItems(List.of(burgerItem));
+
+        RestaurantTable table = new RestaurantTable(null, 7, 0, 0, 1, 1, TableStatus.OCCUPIED);
+
+        when(orderRepository.findById(200L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        when(restaurantTableRepository.findByTableNumber(7)).thenReturn(Optional.of(table));
+        when(restaurantTableRepository.save(any(RestaurantTable.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ReceiptDto receipt = service.payOrder(200L);
+
+        assertNotNull(receipt);
+        assertEquals(200L, receipt.orderId());
+        assertEquals(7, receipt.tableNumber());
+        assertEquals(298.0, receipt.total(), 0.0001);
+        assertTrue(containsLine(receipt.lines(), "Jensens Burger", 2, 149.0, 298.0));
+
+        assertEquals(OrderStatus.PAID, order.getOrderStatus());
+        assertEquals(TableStatus.FREE, table.getStatus());
+
+        verify(orderRepository).save(order);
+        verify(restaurantTableRepository).findByTableNumber(7);
+        verify(restaurantTableRepository).save(table);
+    }
 
     @Test
     void payOrder_doesNotFailIfTableNotFound_stillPaysAndReturnsReceipt() {
-        // Arrange
-    void getKitchenItems_delegatesToRepository_andMaps() {
-        Instant since = Instant.parse("2025-01-01T00:00:00Z");
-        long lastId = 0L;
-
         Order order = new Order();
         order.setId(300L);
         order.setTableNumber(9);
@@ -482,12 +472,43 @@ class OrderServiceImplTest {
         DrinkItem vand = new DrinkItem("Kildevand", 29.0, null);
         OrderItem vandItem = new OrderItem();
         vandItem.setDrinkItem(vand);
-        vandItem.setQuantity(1); // 29
+        vandItem.setQuantity(1);
         order.setItems(List.of(vandItem));
 
         when(orderRepository.findById(300L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
-        order.setId(1L);
+        when(restaurantTableRepository.findByTableNumber(9)).thenReturn(Optional.empty());
+
+        ReceiptDto receipt = service.payOrder(300L);
+
+        assertNotNull(receipt);
+        assertEquals(29.0, receipt.total(), 0.0001);
+        assertEquals(OrderStatus.PAID, order.getOrderStatus());
+
+        verify(orderRepository).save(order);
+        verify(restaurantTableRepository).findByTableNumber(9);
+        verify(restaurantTableRepository, never()).save(any(RestaurantTable.class));
+    }
+
+    @Test
+    void payOrder_throwsWhenOrderNotFound() {
+        when(orderRepository.findById(400L)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> service.payOrder(400L));
+
+        verify(orderRepository).findById(400L);
+        verifyNoMoreInteractions(orderRepository);
+        verifyNoInteractions(restaurantTableRepository);
+    }
+
+    // ---------------- getKitchenItems ----------------
+
+    @Test
+    void getKitchenItems_delegatesToRepository_andMaps() {
+        Instant since = Instant.parse("2025-01-01T00:00:00Z");
+        long lastId = 0L;
+
+        Order order = openOrder(123L, 9);
 
         OrderItem oi = new OrderItem();
         oi.setId(1L);
@@ -495,47 +516,38 @@ class OrderServiceImplTest {
         oi.setSentAt(Instant.parse("2025-01-02T00:00:00Z"));
         oi.setOrder(order);
 
-        when(restaurantTableRepository.findByTableNumber(9)).thenReturn(Optional.empty());
         when(orderItemRepository.findKitchenItemsAfter(since, lastId)).thenReturn(List.of(oi));
 
-        // Act
-        ReceiptDto receipt = orderService.payOrder(300L);
         List<KitchenOrderItemDto> res = service.getKitchenItems(since, lastId);
 
-        // Assert
-        assertNotNull(receipt);
-        assertEquals(29.0, receipt.total(), 0.0001);
-        assertEquals(OrderStatus.PAID, order.getOrderStatus());
         assertEquals(1, res.size());
-        // we assume KitchenOrderItemDto::from creates a non-null dto
         assertNotNull(res.get(0));
     }
 
-        verify(orderRepository, times(2)).findById(300L);
-        verify(orderRepository).save(order);
-
-        verify(restaurantTableRepository).findByTableNumber(9);
-        verify(restaurantTableRepository, never()).save(any(RestaurantTable.class));
-    }
     // ---------------- bumpKitchenTicket ----------------
 
     @Test
-    void payOrder_throwsWhenOrderNotFound() {
-        when(orderRepository.findById(400L)).thenReturn(Optional.empty());
     void bumpKitchenTicket_callsRepositoryUpdate() {
         Order order = openOrder(123L, 9);
 
         when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
                 .thenReturn(Optional.of(order));
-
-        assertThrows(OrderNotFoundException.class, () -> orderService.payOrder(400L));
         when(orderItemRepository.bumpKitchenItems(eq(123L), any(Instant.class))).thenReturn(3);
 
-        verify(orderRepository).findById(400L);
-        verifyNoMoreInteractions(orderRepository);
-        verifyNoInteractions(restaurantTableRepository);
-    }
         service.bumpKitchenTicket(9);
+
+        verify(orderItemRepository).bumpKitchenItems(eq(123L), any(Instant.class));
+    }
+
+    @Test
+    void bumpKitchenTicket_throwsIfNoOpenOrder() {
+        when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
+                .thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> service.bumpKitchenTicket(9));
+    }
+
+    // ---------- assertion helper ----------
 
     private boolean containsLine(List<ReceiptLineDto> lines,
                                  String name,
@@ -551,14 +563,5 @@ class OrderServiceImplTest {
             }
         }
         return false;
-        verify(orderItemRepository).bumpKitchenItems(eq(123L), any(Instant.class));
-    }
-
-    @Test
-    void bumpKitchenTicket_throwsIfNoOpenOrder() {
-        when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
-                .thenReturn(Optional.empty());
-
-        assertThrows(OrderNotFoundException.class, () -> service.bumpKitchenTicket(9));
     }
 }
