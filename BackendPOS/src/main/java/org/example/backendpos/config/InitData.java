@@ -1,5 +1,7 @@
 package org.example.backendpos.config;
 
+import org.example.backendpos.model.Employee;
+import org.example.backendpos.model.EmployeeRole;
 import org.example.backendpos.model.RestaurantTable;
 import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.Category;
@@ -13,6 +15,7 @@ import org.example.backendpos.repository.DrinkItemRepository;
 import org.example.backendpos.repository.FoodItemRepository;
 import org.example.backendpos.repository.OrderRepository;
 import org.example.backendpos.repository.RestaurantTableRepository;
+import org.example.backendpos.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -26,14 +29,16 @@ public class InitData implements CommandLineRunner {
     private final FoodItemRepository foodItemRepository;
     private final DrinkItemRepository drinkItemRepository;
     private final OrderRepository orderRepository;
+    private final EmployeeRepository employeeRepository;
 
     public InitData(RestaurantTableRepository restaurantTableRepository, CategoryRepository categoryRepository,
-                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository, OrderRepository orderRepository) {
+                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository, OrderRepository orderRepository, EmployeeRepository employeeRepository) {
         this.restaurantTableRepository = restaurantTableRepository;
         this.categoryRepository = categoryRepository;
         this.foodItemRepository = foodItemRepository;
         this.drinkItemRepository = drinkItemRepository;
         this.orderRepository = orderRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     @Override
@@ -42,6 +47,7 @@ public class InitData implements CommandLineRunner {
         initTables();
         initMenu();
         initOrder();
+        initEmployees();
     }
 
     private void initTables(){
@@ -316,7 +322,29 @@ public class InitData implements CommandLineRunner {
 
         orderRepository.save(order);
     }
-}
 
+    private void initEmployees() {
+        if (employeeRepository.count() > 0) {
+            return;
+        }
+
+        List<Employee> employees = List.of(
+                // STAFF (laveste rolle)
+                new Employee(null, "Mette", EmployeeRole.STAFF, "1111"),
+                new Employee(null, "Jonas", EmployeeRole.STAFF, "2222"),
+                new Employee(null, "Frederik", EmployeeRole.STAFF, "3333"),
+
+                // LEADER (kan alt STAFF kan)
+                new Employee(null, "Caroline", EmployeeRole.LEADER, "4444"),
+                new Employee(null, "Thomas", EmployeeRole.LEADER, "5555"),
+
+                // CHIEF (øverste rolle)
+                new Employee(null, "Sofie", EmployeeRole.CHIEF, "9999")
+        );
+
+        employeeRepository.saveAll(employees);
+        System.out.println("Employees initialized: " + employees.size());
+    }
+}
 
 

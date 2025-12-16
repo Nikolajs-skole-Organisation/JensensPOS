@@ -6,6 +6,7 @@ import org.example.backendpos.dto.ReceiptDto;
 import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.model.order.MeatTemperature;
 import org.example.backendpos.service.OrderService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -54,5 +55,10 @@ public class OrderController {
     @PostMapping("/orders/{orderId}/pay")
     public ReceiptDto payOrder(@PathVariable Long orderId) {
         return orderService.payOrder(orderId);
+    }
+
+    @PostMapping("/tables/{tableNumber}/send")
+    public void sendToKitchenAndBar(@PathVariable int tableNumber){
+        orderService.sendToKitchenAndBar(tableNumber);
     }
 }
