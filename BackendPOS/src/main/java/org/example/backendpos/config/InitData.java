@@ -53,26 +53,26 @@ public class InitData implements CommandLineRunner {
                 // Pink area
                 new RestaurantTable(null, 3, 2, 0, 3, 1, TableStatus.FREE),
                 new RestaurantTable(null, 4, 0, 4, 1, 2, TableStatus.FREE),
-                new RestaurantTable(null, 5, 0, 8, 1, 2, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 6, 0, 11, 1, 2, TableStatus.OCCUPIED),
+            new RestaurantTable(null, 5, 0, 8, 1, 2, TableStatus.FREE),
+                new RestaurantTable(null, 6, 0, 11, 1, 2, TableStatus.FREE),
 
                 // Blue area
-                new RestaurantTable(null, 9, 0, 14, 1, 1, TableStatus.RESERVED),
-                new RestaurantTable(null, 8, 2, 14, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 9, 0, 14, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 8, 2, 14, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 7, 4, 14, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 12, 0, 18, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 11, 2, 18, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 11, 2, 18, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 10, 4, 18, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 16, 0, 21, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 15, 1, 21, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 15, 1, 21, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 14, 3, 21, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 13, 5, 21, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 20, 0, 24, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 19, 1, 24, 1, 1, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 18, 3, 24, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 19, 1, 24, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 18, 3, 24, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 17, 5, 24, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 23, 0, 27, 1, 1, TableStatus.FREE),
@@ -80,11 +80,11 @@ public class InitData implements CommandLineRunner {
                 new RestaurantTable(null, 21, 4, 27, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 30, 8, 19, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 31, 8, 20, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 31, 8, 20, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 32, 8, 22, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 33, 8, 23, 1, 1, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 34, 8, 24, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 33, 8, 23, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 34, 8, 24, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 35, 8, 25, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 36, 8, 27, 1, 1, TableStatus.FREE),
