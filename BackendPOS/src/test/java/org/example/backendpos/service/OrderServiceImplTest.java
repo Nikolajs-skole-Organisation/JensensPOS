@@ -30,6 +30,7 @@ class OrderServiceImplTest {
     @Mock private AddItemResponseMapper addItemResponseMapper;
     @Mock private OrderItemRepository orderItemRepository;
     @Mock private RestaurantTableRepository restaurantTableRepository;
+    @Mock private EmployeeRepository employeeRepository;
 
     @InjectMocks
     private OrderServiceImpl service;
@@ -563,5 +564,68 @@ class OrderServiceImplTest {
             }
         }
         return false;
+    }
+
+    // ---------------- validateChiefPin ----------------
+
+    @Test
+    void validateChiefPin_throwsIfPinFormatWrong() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.validateChiefPin("12"));
+        assertEquals("Den skal bruge chief kode", ex.getMessage());
+    }
+
+    @Test
+    void validateChiefPin_throwsIfNoEmployeeWithPin() {
+        when(employeeRepository.findByPinCode("9999")).thenReturn(Optional.empty());
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.validateChiefPin("9999"));
+        assertEquals("Den skal bruge chief kode", ex.getMessage());
+    }
+
+    @Test
+    void validateChiefPin_throwsIfEmployeeNotChief() {
+        var emp = mock(org.example.backendpos.model.Employee.class);
+        when(emp.getRole()).thenReturn(org.example.backendpos.model.EmployeeRole.STAFF);
+
+        when(employeeRepository.findByPinCode("9999")).thenReturn(Optional.of(emp));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.validateChiefPin("9999"));
+        assertEquals("Den skal bruge chief kode", ex.getMessage());
+    }
+
+    // ---------------- compOrder ----------------
+
+    @Test
+    void compOrder_throwsIfPinWrongFormat() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.compOrder(1L, "12", "mistake"));
+        assertEquals("Den skal bruge chief kode", ex.getMessage());
+    }
+
+    @Test
+    void compOrder_throwsIfNotChiefPin() {
+        var emp = mock(org.example.backendpos.model.Employee.class);
+        when(emp.getRole()).thenReturn(org.example.backendpos.model.EmployeeRole.STAFF);
+
+        when(employeeRepository.findByPinCode("9999")).thenReturn(Optional.of(emp));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> service.compOrder(1L, "9999", "mistake"));
+        assertEquals("Den skal bruge chief kode", ex.getMessage());
+    }
+
+    @Test
+    void compOrder_throwsIfOrderNotFound() {
+        var emp = mock(org.example.backendpos.model.Employee.class);
+        when(emp.getRole()).thenReturn(org.example.backendpos.model.EmployeeRole.CHIEF);
+
+        when(employeeRepository.findByPinCode("9999")).thenReturn(Optional.of(emp));
+        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class,
+                () -> service.compOrder(1L, "9999", "mistake"));
     }
 }
