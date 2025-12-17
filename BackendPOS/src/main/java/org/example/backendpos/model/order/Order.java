@@ -26,6 +26,7 @@ public class Order {
     private int tableNumber;
     private int amountOfGuests;
     private boolean hasBeenMade;
+    private boolean comped = false;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
