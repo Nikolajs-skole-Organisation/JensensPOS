@@ -1,10 +1,8 @@
 package org.example.backendpos.service;
 
 import org.example.backendpos.dto.*;
-import org.example.backendpos.exception.DrinkItemNotFoundException;
-import org.example.backendpos.exception.FoodItemNotFoundException;
-import org.example.backendpos.exception.MissingMeatTemperatureException;
-import org.example.backendpos.exception.OrderNotFoundException;
+import org.example.backendpos.exception.*;
+import org.example.backendpos.model.EmployeeRole;
 import org.example.backendpos.model.RestaurantTable;
 import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.*;
@@ -32,10 +30,12 @@ public class OrderServiceImpl implements OrderService {
     private final AddItemResponseMapper addItemResponseMapper;
     private final RestaurantTableRepository restaurantTableRepository;
     private final OrderItemRepository orderItemRepository;
+    private final EmployeeRepository employeeRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository, CategoryRepository categoryRepository,
                             DrinkItemRepository drinkItemRepository, FoodItemRepository foodItemRepository,
-                            AddItemResponseMapper addItemResponseMapper, RestaurantTableRepository restaurantTableRepository, OrderItemRepository orderItemRepository) {
+                            AddItemResponseMapper addItemResponseMapper, RestaurantTableRepository restaurantTableRepository,
+                            OrderItemRepository orderItemRepository, EmployeeRepository employeeRepository) {
         this.orderRepository = orderRepository;
         this.categoryRepository = categoryRepository;
         this.drinkItemRepository = drinkItemRepository;
@@ -43,6 +43,7 @@ public class OrderServiceImpl implements OrderService {
         this.addItemResponseMapper = addItemResponseMapper;
         this.restaurantTableRepository = restaurantTableRepository;
         this.orderItemRepository = orderItemRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public StartOrderResponse startOrderResponse(int tableNumber, int amountOfGuests) {
@@ -197,6 +198,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
 
+        boolean comped = order.isComped();
+
         List<OrderItem> items = order.getItems();
         List<ReceiptLineDto> lines = new java.util.ArrayList<>();
 
@@ -208,10 +211,10 @@ public class OrderServiceImpl implements OrderService {
 
             if (oi.getFoodItem() != null) {
                 name = oi.getFoodItem().getName();
-                unitPrice = oi.getFoodItem().getPrice();
+                unitPrice = comped ? 0.0 : oi.getFoodItem().getPrice();
             } else {
                 name = oi.getDrinkItem().getName();
-                unitPrice = oi.getDrinkItem().getPrice();
+                unitPrice = comped ? 0.0 : oi.getDrinkItem().getPrice();
             }
 
             double lineTotal = unitPrice * oi.getQuantity();
@@ -292,4 +295,56 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.bumpKitchenItems(order.getId(), Instant.now().truncatedTo(ChronoUnit.MILLIS));
     }
 
+    @Transactional
+    @Override
+    public ReceiptDto compOrder(Long orderId, String pin, String reason) {
+
+        if (pin == null || !pin.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Den skal bruge chief kode");
+        }
+
+        var employee = employeeRepository.findByPinCode(pin)
+                .orElseThrow(() -> new IllegalArgumentException("Den skal bruge chief kode"));
+
+        if (employee.getRole() != EmployeeRole.CHIEF) {
+            throw new IllegalArgumentException("Den skal bruge chief kode");
+        }
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Du skal angive en årsag");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Ordre ikke fundet med id: " + orderId));
+
+        if (order.getOrderStatus() != OrderStatus.OPEN) {
+            throw new IllegalStateException("Kun åbne orders kan compes");
+        }
+
+        order.setComped(true);
+        order.setOrderStatus(OrderStatus.PAID);
+        orderRepository.save(order);
+
+        restaurantTableRepository.findByTableNumber(order.getTableNumber())
+                .ifPresent(t -> {
+                    t.setStatus(TableStatus.FREE);
+                    restaurantTableRepository.save(t);
+                });
+
+        return calculateReceipt(orderId);
+    }
+
+    @Override
+    public void validateChiefPin(String pin) {
+        if (pin == null || !pin.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Den skal bruge chief kode");
+        }
+
+        var employee = employeeRepository.findByPinCode(pin)
+                .orElseThrow(() -> new IllegalArgumentException("Den skal bruge chief kode"));
+
+        if (employee.getRole() != EmployeeRole.CHIEF) {
+            throw new IllegalArgumentException("Den skal bruge chief kode");
+        }
+    }
 }

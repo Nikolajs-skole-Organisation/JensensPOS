@@ -1,9 +1,7 @@
 package org.example.backendpos.controller;
 
-import org.example.backendpos.dto.AddItemResponse;
-import org.example.backendpos.dto.AddOrderItemRequest;
-import org.example.backendpos.dto.ReceiptDto;
-import org.example.backendpos.dto.StartOrderResponse;
+import org.example.backendpos.dto.*;
+import org.example.backendpos.model.EmployeeRole;
 import org.example.backendpos.model.order.MeatTemperature;
 import org.example.backendpos.service.OrderService;
 import org.springframework.http.ResponseEntity;
@@ -60,5 +58,18 @@ public class OrderController {
     @PostMapping("/tables/{tableNumber}/send")
     public void sendToKitchenAndBar(@PathVariable int tableNumber){
         orderService.sendToKitchenAndBar(tableNumber);
+    }
+
+    @PostMapping("/orders/comp/validate")
+    public void validateChiefPin(@RequestBody PinRequest request) {
+        orderService.validateChiefPin(request.pin());
+    }
+
+    @PostMapping("/orders/{orderId}/comp")
+    public ReceiptDto compOrder(
+            @PathVariable Long orderId,
+            @RequestBody CompOrderRequest request
+    ) {
+        return orderService.compOrder(orderId, request.pin(), request.reason());
     }
 }

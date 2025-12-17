@@ -1,4 +1,4 @@
-import { getReceipt, payOrder } from "../services/orderApi.js";
+import { getReceipt, payOrder, compOrder, validateChiefPin } from "../services/orderApi.js";
 
 const orderTableInfoEl  = document.getElementById("order-table-info");
 const orderStatusInfoEl = document.getElementById("order-status-info");
@@ -10,6 +10,7 @@ const itemsContainerEl  = document.getElementById("items-container");
 const errorEl           = document.getElementById("order-error");
 const backToOverviewBtn = document.getElementById("back-to-overview-btn");
 const payBtn = document.getElementById("pay-btn");
+const compBtn = document.getElementById("comp-btn");
 const API_BASE = "http://localhost:8080";
 
 let orderId = null;
@@ -320,4 +321,41 @@ payBtn.addEventListener("click", async () => {
         console.error(e);
         alert("Fejl ved betaling: " + e.message);
     }
+});
+
+compBtn.addEventListener("click", async () => {
+  if (!orderId) return;
+
+  const pin = prompt("Indtast 4-cifret CHIEF-kode:");
+  if (pin == null) return;
+
+  if (!/^\d{4}$/.test(pin)) {
+    alert("Koden skal være 4 cifre.");
+    return;
+  }
+
+  try {
+    await validateChiefPin(pin);
+  } catch (e) {
+    alert("Der skal bruges chief kode");
+    return; 
+  }
+
+  const reason = prompt("Angiv årsag til comp:");
+  if (reason == null) return;
+
+  if (!reason.trim()) {
+    alert("Du skal angive en årsag.");
+    return;
+  }
+
+  try {
+    const receipt = await compOrder(orderId, pin, reason);
+    alert(`Ordren er comp'et.\nTOTAL: ${receipt.total} kr`);
+
+    sessionStorage.removeItem("currentOrder");
+    window.location.href = "overview.html";
+  } catch (e) {
+    alert(e.message);
+  }
 });

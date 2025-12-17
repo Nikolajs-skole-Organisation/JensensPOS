@@ -5,6 +5,7 @@ import org.example.backendpos.dto.AddOrderItemRequest;
 import org.example.backendpos.dto.ReceiptDto;
 import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.dto.*;
+import org.example.backendpos.model.EmployeeRole;
 import org.example.backendpos.model.order.Order;
 
 import java.time.Instant;
@@ -25,6 +26,10 @@ public interface OrderService {
     ReceiptDto calculateReceipt(Long orderId);
 
     ReceiptDto payOrder(Long orderId);
+
+    ReceiptDto compOrder(Long orderId, String pin, String reason);
+
+    void validateChiefPin(String pin);
 
     void sendToKitchenAndBar(int tableNumber);
 
