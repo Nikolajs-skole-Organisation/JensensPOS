@@ -1,5 +1,9 @@
 package org.example.backendpos.service;
 
+import org.example.backendpos.dto.AddItemResponse;
+import org.example.backendpos.dto.AddOrderItemRequest;
+import org.example.backendpos.dto.ReceiptDto;
+import org.example.backendpos.dto.StartOrderResponse;
 import org.example.backendpos.dto.*;
 import org.example.backendpos.model.order.Order;
 
@@ -17,6 +21,10 @@ public interface OrderService {
     Order getOrderById(Long orderId);
 
     AddItemResponse getOrderDetails(Long orderId);
+
+    ReceiptDto calculateReceipt(Long orderId);
+
+    ReceiptDto payOrder(Long orderId);
 
     void sendToKitchenAndBar(int tableNumber);
 

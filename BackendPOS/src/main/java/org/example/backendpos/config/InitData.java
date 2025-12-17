@@ -7,6 +7,14 @@ import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.Category;
 import org.example.backendpos.model.order.DrinkItem;
 import org.example.backendpos.model.order.FoodItem;
+import org.example.backendpos.model.order.Order;
+import org.example.backendpos.model.order.OrderItem;
+import org.example.backendpos.model.order.OrderStatus;
+import org.example.backendpos.repository.CategoryRepository;
+import org.example.backendpos.repository.DrinkItemRepository;
+import org.example.backendpos.repository.FoodItemRepository;
+import org.example.backendpos.repository.OrderRepository;
+import org.example.backendpos.repository.RestaurantTableRepository;
 import org.example.backendpos.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -20,14 +28,16 @@ public class InitData implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final FoodItemRepository foodItemRepository;
     private final DrinkItemRepository drinkItemRepository;
+    private final OrderRepository orderRepository;
     private final EmployeeRepository employeeRepository;
 
     public InitData(RestaurantTableRepository restaurantTableRepository, CategoryRepository categoryRepository,
-                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository, EmployeeRepository employeeRepository) {
+                    FoodItemRepository foodItemRepository, DrinkItemRepository drinkItemRepository, OrderRepository orderRepository, EmployeeRepository employeeRepository) {
         this.restaurantTableRepository = restaurantTableRepository;
         this.categoryRepository = categoryRepository;
         this.foodItemRepository = foodItemRepository;
         this.drinkItemRepository = drinkItemRepository;
+        this.orderRepository = orderRepository;
         this.employeeRepository = employeeRepository;
     }
 
@@ -36,6 +46,7 @@ public class InitData implements CommandLineRunner {
 
         initTables();
         initMenu();
+        initOrder();
         initEmployees();
     }
 
@@ -48,26 +59,26 @@ public class InitData implements CommandLineRunner {
                 // Pink area
                 new RestaurantTable(null, 3, 2, 0, 3, 1, TableStatus.FREE),
                 new RestaurantTable(null, 4, 0, 4, 1, 2, TableStatus.FREE),
-                new RestaurantTable(null, 5, 0, 8, 1, 2, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 6, 0, 11, 1, 2, TableStatus.OCCUPIED),
+            new RestaurantTable(null, 5, 0, 8, 1, 2, TableStatus.FREE),
+                new RestaurantTable(null, 6, 0, 11, 1, 2, TableStatus.FREE),
 
                 // Blue area
-                new RestaurantTable(null, 9, 0, 14, 1, 1, TableStatus.RESERVED),
-                new RestaurantTable(null, 8, 2, 14, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 9, 0, 14, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 8, 2, 14, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 7, 4, 14, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 12, 0, 18, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 11, 2, 18, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 11, 2, 18, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 10, 4, 18, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 16, 0, 21, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 15, 1, 21, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 15, 1, 21, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 14, 3, 21, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 13, 5, 21, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 20, 0, 24, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 19, 1, 24, 1, 1, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 18, 3, 24, 1, 1, TableStatus.RESERVED),
+                new RestaurantTable(null, 19, 1, 24, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 18, 3, 24, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 17, 5, 24, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 23, 0, 27, 1, 1, TableStatus.FREE),
@@ -75,11 +86,11 @@ public class InitData implements CommandLineRunner {
                 new RestaurantTable(null, 21, 4, 27, 1, 2, TableStatus.FREE),
 
                 new RestaurantTable(null, 30, 8, 19, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 31, 8, 20, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 31, 8, 20, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 32, 8, 22, 1, 1, TableStatus.FREE),
-                new RestaurantTable(null, 33, 8, 23, 1, 1, TableStatus.OCCUPIED),
-                new RestaurantTable(null, 34, 8, 24, 1, 1, TableStatus.OCCUPIED),
+                new RestaurantTable(null, 33, 8, 23, 1, 1, TableStatus.FREE),
+                new RestaurantTable(null, 34, 8, 24, 1, 1, TableStatus.FREE),
                 new RestaurantTable(null, 35, 8, 25, 1, 1, TableStatus.FREE),
 
                 new RestaurantTable(null, 36, 8, 27, 1, 1, TableStatus.FREE),
@@ -291,6 +302,25 @@ public class InitData implements CommandLineRunner {
                 vand,
                 husetsVin
         ));
+    }
+
+    private void initOrder() {
+        int tableNumber = 5;
+
+        boolean orderExists = orderRepository
+                .findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .isPresent();
+
+        if (orderExists) {
+            return;
+        }
+
+        Order order = new Order();
+        order.setTableNumber(tableNumber);
+        order.setAmountOfGuests(2);
+        order.setOrderStatus(OrderStatus.OPEN);
+
+        orderRepository.save(order);
     }
 
     private void initEmployees() {

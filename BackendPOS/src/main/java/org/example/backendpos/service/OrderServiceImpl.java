@@ -5,7 +5,14 @@ import org.example.backendpos.exception.DrinkItemNotFoundException;
 import org.example.backendpos.exception.FoodItemNotFoundException;
 import org.example.backendpos.exception.MissingMeatTemperatureException;
 import org.example.backendpos.exception.OrderNotFoundException;
+import org.example.backendpos.model.RestaurantTable;
+import org.example.backendpos.model.TableStatus;
 import org.example.backendpos.model.order.*;
+import org.example.backendpos.repository.CategoryRepository;
+import org.example.backendpos.repository.DrinkItemRepository;
+import org.example.backendpos.repository.FoodItemRepository;
+import org.example.backendpos.repository.OrderRepository;
+import org.example.backendpos.repository.RestaurantTableRepository;
 import org.example.backendpos.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +30,18 @@ public class OrderServiceImpl implements OrderService {
     private final DrinkItemRepository drinkItemRepository;
     private final FoodItemRepository foodItemRepository;
     private final AddItemResponseMapper addItemResponseMapper;
+    private final RestaurantTableRepository restaurantTableRepository;
     private final OrderItemRepository orderItemRepository;
 
     public OrderServiceImpl(OrderRepository orderRepository, CategoryRepository categoryRepository,
                             DrinkItemRepository drinkItemRepository, FoodItemRepository foodItemRepository,
-                            AddItemResponseMapper addItemResponseMapper, OrderItemRepository orderItemRepository) {
+                            AddItemResponseMapper addItemResponseMapper, RestaurantTableRepository restaurantTableRepository, OrderItemRepository orderItemRepository) {
         this.orderRepository = orderRepository;
         this.categoryRepository = categoryRepository;
         this.drinkItemRepository = drinkItemRepository;
         this.foodItemRepository = foodItemRepository;
         this.addItemResponseMapper = addItemResponseMapper;
+        this.restaurantTableRepository = restaurantTableRepository;
         this.orderItemRepository = orderItemRepository;
     }
 
@@ -45,6 +54,14 @@ public class OrderServiceImpl implements OrderService {
                     newOrder.setAmountOfGuests(amountOfGuests);
                     newOrder.setOrderStatus(OrderStatus.OPEN);
                     return orderRepository.save(newOrder);
+                });
+
+        restaurantTableRepository.findByTableNumber(tableNumber)
+                .ifPresent(table -> {
+                    if (table.getStatus() != TableStatus.BLOCKED) {
+                        table.setStatus(TableStatus.OCCUPIED);
+                        restaurantTableRepository.save(table);
+                    }
                 });
 
         List<Category> categories = categoryRepository.findAll();
@@ -174,6 +191,70 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
 
         return addItemResponseMapper.toDto(order);
+    }
+    @Override
+    public ReceiptDto calculateReceipt(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
+
+        List<OrderItem> items = order.getItems();
+        List<ReceiptLineDto> lines = new java.util.ArrayList<>();
+
+        double total = 0.0;
+
+        for (OrderItem oi : items) {
+            String name;
+            double unitPrice;
+
+            if (oi.getFoodItem() != null) {
+                name = oi.getFoodItem().getName();
+                unitPrice = oi.getFoodItem().getPrice();
+            } else {
+                name = oi.getDrinkItem().getName();
+                unitPrice = oi.getDrinkItem().getPrice();
+            }
+
+            double lineTotal = unitPrice * oi.getQuantity();
+            total += lineTotal;
+
+            ReceiptLineDto line = new ReceiptLineDto(
+                    name,
+                    oi.getQuantity(),
+                    unitPrice,
+                    lineTotal
+            );
+            lines.add(line);
+        }
+
+        return new ReceiptDto(
+                order.getId(),
+                order.getTableNumber(),
+                lines,
+                total
+        );
+    }
+
+    @Transactional
+    @Override
+    public ReceiptDto payOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
+
+        ReceiptDto receipt = calculateReceipt(orderId);
+
+        order.setOrderStatus(OrderStatus.PAID);
+        orderRepository.save(order);
+
+        RestaurantTable restaurantTable = restaurantTableRepository
+                .findByTableNumber(order.getTableNumber())
+                .orElse(null);
+
+        if (restaurantTable != null) {
+            restaurantTable.setStatus(TableStatus.FREE);
+            restaurantTableRepository.save(restaurantTable);
+        }
+
+        return receipt;
     }
 
     @Override
