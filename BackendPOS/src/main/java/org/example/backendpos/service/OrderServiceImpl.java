@@ -281,18 +281,30 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<KitchenOrderItemDto> getKitchenItems(Instant since, long lastId) {
-        return orderItemRepository.findKitchenItemsAfter(since, lastId)
+        return orderItemRepository.findItemsAfterForStation(since, lastId, "KITCHEN")
                 .stream()
                 .map(KitchenOrderItemDto::from)
                 .toList();
     }
 
-    @Transactional
-    public void bumpKitchenTicket(int tableNumber) {
-        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
-                .orElseThrow(() -> new OrderNotFoundException("No open order for table " + tableNumber));
+    @Override
+    public List<BarOrderItemDto> getBarItems(Instant since, long lastId){
+        return orderItemRepository.findItemsAfterForStation(since, lastId, "BAR")
+                .stream()
+                .map(BarOrderItemDto::from)
+                .toList();
+    }
 
-        orderItemRepository.bumpKitchenItems(order.getId(), Instant.now().truncatedTo(ChronoUnit.MILLIS));
+    @Transactional
+    @Override
+    public void bumpKitchenTicket(int tableNumber) {
+        bumpStation(tableNumber, "KITCHEN");
+    }
+
+    @Transactional
+    @Override
+    public void bumpBarTicket(int tableNumber) {
+        bumpStation(tableNumber, "BAR");
     }
 
     @Transactional
@@ -346,5 +358,16 @@ public class OrderServiceImpl implements OrderService {
         if (employee.getRole() != EmployeeRole.CHIEF) {
             throw new IllegalArgumentException("Den skal bruge chief kode");
         }
+    }
+
+    private void bumpStation(int tableNumber, String station){
+        Order order = orderRepository.findByTableNumberAndOrderStatus(tableNumber, OrderStatus.OPEN)
+                .orElseThrow(() -> new OrderNotFoundException("Ordre ikke fundet for bor nummer: " +tableNumber));
+
+        orderItemRepository.bumpItemsForStation(
+                order.getId(),
+                Instant.now().truncatedTo(ChronoUnit.MILLIS),
+                station
+        );
     }
 }

@@ -34,5 +34,10 @@ public interface OrderService {
     void sendToKitchenAndBar(int tableNumber);
 
     List<KitchenOrderItemDto> getKitchenItems(Instant since, long lastId);
+
+    List<BarOrderItemDto> getBarItems(Instant since, long lastId);
+
     void bumpKitchenTicket(int tableNumber);
+
+    void bumpBarTicket(int tableNumber);
 }
