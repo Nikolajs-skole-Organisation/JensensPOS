@@ -1,4 +1,4 @@
-import { createTicketBoard } from "./ticketBoard";
+import { createTicketBoard } from "./ticketBoard.js";
 import {
   getKitchenUpdates,
   bumpKitchenTicket,
