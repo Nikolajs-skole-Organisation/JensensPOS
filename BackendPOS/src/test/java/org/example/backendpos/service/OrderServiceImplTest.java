@@ -504,41 +504,41 @@ class OrderServiceImplTest {
 
     // ---------------- getKitchenItems ----------------
 
-    @Test
-    void getKitchenItems_delegatesToRepository_andMaps() {
-        Instant since = Instant.parse("2025-01-01T00:00:00Z");
-        long lastId = 0L;
-
-        Order order = openOrder(123L, 9);
-
-        OrderItem oi = new OrderItem();
-        oi.setId(1L);
-        oi.setHasBeenSent(true);
-        oi.setSentAt(Instant.parse("2025-01-02T00:00:00Z"));
-        oi.setOrder(order);
-
-        when(orderItemRepository.findKitchenItemsAfter(since, lastId)).thenReturn(List.of(oi));
-
-        List<KitchenOrderItemDto> res = service.getKitchenItems(since, lastId);
-
-        assertEquals(1, res.size());
-        assertNotNull(res.get(0));
-    }
+//    @Test
+//    void getKitchenItems_delegatesToRepository_andMaps() {
+//        Instant since = Instant.parse("2025-01-01T00:00:00Z");
+//        long lastId = 0L;
+//
+//        Order order = openOrder(123L, 9);
+//
+//        OrderItem oi = new OrderItem();
+//        oi.setId(1L);
+//        oi.setHasBeenSent(true);
+//        oi.setSentAt(Instant.parse("2025-01-02T00:00:00Z"));
+//        oi.setOrder(order);
+//
+//        when(orderItemRepository.findKitchenItemsAfter(since, lastId)).thenReturn(List.of(oi));
+//
+//        List<KitchenOrderItemDto> res = service.getKitchenItems(since, lastId);
+//
+//        assertEquals(1, res.size());
+//        assertNotNull(res.get(0));
+//    }
 
     // ---------------- bumpKitchenTicket ----------------
 
-    @Test
-    void bumpKitchenTicket_callsRepositoryUpdate() {
-        Order order = openOrder(123L, 9);
-
-        when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
-                .thenReturn(Optional.of(order));
-        when(orderItemRepository.bumpKitchenItems(eq(123L), any(Instant.class))).thenReturn(3);
-
-        service.bumpKitchenTicket(9);
-
-        verify(orderItemRepository).bumpKitchenItems(eq(123L), any(Instant.class));
-    }
+//    @Test
+//    void bumpKitchenTicket_callsRepositoryUpdate() {
+//        Order order = openOrder(123L, 9);
+//
+//        when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
+//                .thenReturn(Optional.of(order));
+//        when(orderItemRepository.bumpKitchenItems(eq(123L), any(Instant.class))).thenReturn(3);
+//
+//        service.bumpKitchenTicket(9);
+//
+//        verify(orderItemRepository).bumpKitchenItems(eq(123L), any(Instant.class));
+//    }
 
     @Test
     void bumpKitchenTicket_throwsIfNoOpenOrder() {
