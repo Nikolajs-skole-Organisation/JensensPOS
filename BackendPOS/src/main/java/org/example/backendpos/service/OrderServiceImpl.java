@@ -217,6 +217,11 @@ public class OrderServiceImpl implements OrderService {
                 unitPrice = comped ? 0.0 : oi.getDrinkItem().getPrice();
             }
 
+            boolean lineComped = comped || oi.isComped();
+            if (lineComped) {
+                unitPrice = 0.0;
+            }
+
             double lineTotal = unitPrice * oi.getQuantity();
             total += lineTotal;
 
@@ -369,5 +374,54 @@ public class OrderServiceImpl implements OrderService {
                 Instant.now().truncatedTo(ChronoUnit.MILLIS),
                 station
         );
+    }
+
+    @Transactional
+    @Override
+    public ReceiptDto compOrderItems(Long orderId, String pin, String reason, List<Long> orderItemIds) {
+
+        if (pin == null || !pin.matches("\\d{4}")) {
+            throw new IllegalArgumentException("Der skal bruges chief kode");
+        }
+
+        var employee = employeeRepository.findByPinCode(pin)
+                .orElseThrow(() -> new IllegalArgumentException("Der skal bruges chief kode"));
+
+        if (employee.getRole() != EmployeeRole.CHIEF) {
+            throw new IllegalArgumentException("Der skal bruges chief kode");
+        }
+
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Du skal angive en årsag");
+        }
+
+        if (orderItemIds == null || orderItemIds.isEmpty()) {
+            throw new IllegalArgumentException("Du skal vælge mindst 1");
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with Id: " + orderId));
+
+        if (order.getOrderStatus() != OrderStatus.OPEN) {
+            throw new IllegalStateException("Kun åbne orders kan compes");
+        }
+
+        if (order.isComped()) {
+            throw new IllegalStateException("Ordren er allerede comped");
+        }
+
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+
+        for (OrderItem oi : order.getItems()) {
+            if (orderItemIds.contains(oi.getId())) {
+                oi.setComped(true);
+                oi.setCompedAt(now);
+                oi.setCompReason(reason);
+            }
+        }
+
+        orderRepository.save(order);
+
+        return calculateReceipt(orderId);
     }
 }
