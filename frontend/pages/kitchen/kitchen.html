@@ -1,26 +1,24 @@
-<body>
-  <header>
-    <strong>Kitchen</strong>
-    <span class="status" id="status">Starting…</span>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kitchen</title>
     <link rel="stylesheet" href="../../css/kitchen.css" />
-  </header>
+  </head>
 
-  <!-- Bump popover -->
-  <div id="bump-popover" class="popover hidden">
-    <button id="bump-action" type="button" class="popover-btn">Bump</button>
-  </div>
+  <body>
+    <header>
+      <strong>Kitchen</strong>
+      <span class="status" id="status">Starting…</span>
+    </header>
 
-  <div id="board"></div>
-
-  <div id="bump-modal" class="modal hidden">
-    <div class="modal-card">
-      <div class="modal-title" id="bump-title">Bump?</div>
-      <div class="modal-actions">
-        <button id="bump-cancel" type="button">Cancel</button>
-        <button id="bump-confirm" type="button" class="primary">Bump</button>
-      </div>
+    <div id="bump-popover" class="popover hidden">
+      <button id="bump-action" type="button" class="popover-btn">Bump</button>
     </div>
-  </div>
 
-  <script type="module" src="../../js/controllers/kitchenView.js"></script>
-</body>
+    <div id="board"></div>
+
+    <script type="module" src="../../js/controllers/kitchenView.js"></script>
+  </body>
+</html>

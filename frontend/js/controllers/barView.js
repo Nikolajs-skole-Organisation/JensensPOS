@@ -5,5 +5,5 @@ createTicketBoard({
   boardEl: document.getElementById("board"),
   getUpdates: getBarUpdates,
   bumpTicket: bumpBarTicket,
-  filterItem: (dto) => dto.item?.drinkItem != null, // bar = drinks
+  filterItem: (dto) => dto.item?.drinkItem != null,
 });
