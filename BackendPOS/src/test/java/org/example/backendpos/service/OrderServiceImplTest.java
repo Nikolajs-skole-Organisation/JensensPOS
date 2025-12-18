@@ -504,6 +504,8 @@ class OrderServiceImplTest {
 
     // ---------------- getKitchenItems ----------------
 
+    // ---------------- getKitchenItems ----------------
+
     @Test
     void getKitchenItems_delegatesToRepository_andMaps() {
         Instant since = Instant.parse("2025-01-01T00:00:00Z");
@@ -517,15 +519,22 @@ class OrderServiceImplTest {
         oi.setSentAt(Instant.parse("2025-01-02T00:00:00Z"));
         oi.setOrder(order);
 
-        when(orderItemRepository.findKitchenItemsAfter(since, lastId)).thenReturn(List.of(oi));
+        // UPDATED: new repo method + station
+        when(orderItemRepository.findItemsAfterForStation(since, lastId, "KITCHEN"))
+                .thenReturn(List.of(oi));
 
         List<KitchenOrderItemDto> res = service.getKitchenItems(since, lastId);
 
         assertEquals(1, res.size());
         assertNotNull(res.get(0));
+        assertEquals(9, res.get(0).tableNumber());
+        assertEquals(Instant.parse("2025-01-02T00:00:00Z"), res.get(0).sentAt());
+        assertNotNull(res.get(0).item());
+
+        verify(orderItemRepository).findItemsAfterForStation(since, lastId, "KITCHEN");
     }
 
-    // ---------------- bumpKitchenTicket ----------------
+// ---------------- bumpKitchenTicket ----------------
 
     @Test
     void bumpKitchenTicket_callsRepositoryUpdate() {
@@ -533,11 +542,81 @@ class OrderServiceImplTest {
 
         when(orderRepository.findByTableNumberAndOrderStatus(9, OrderStatus.OPEN))
                 .thenReturn(Optional.of(order));
-        when(orderItemRepository.bumpKitchenItems(eq(123L), any(Instant.class))).thenReturn(3);
+
+        // UPDATED: new repo method + station
+        when(orderItemRepository.bumpItemsForStation(eq(123L), any(Instant.class), eq("KITCHEN")))
+                .thenReturn(3);
 
         service.bumpKitchenTicket(9);
 
-        verify(orderItemRepository).bumpKitchenItems(eq(123L), any(Instant.class));
+        verify(orderRepository).findByTableNumberAndOrderStatus(9, OrderStatus.OPEN);
+        verify(orderItemRepository).bumpItemsForStation(eq(123L), any(Instant.class), eq("KITCHEN"));
+    }
+
+// ---------------- BAR: getBarItems ----------------
+
+    @Test
+    void getBarItems_delegatesToRepository_andMaps() {
+        Instant since = Instant.parse("2025-01-01T00:00:00Z");
+        long lastId = 0L;
+
+        Order order = openOrder(555L, 12);
+
+        OrderItem oi = new OrderItem();
+        oi.setId(7L);
+        oi.setHasBeenSent(true);
+        oi.setSentAt(Instant.parse("2025-01-03T10:00:00Z"));
+        oi.setOrder(order);
+
+        // at least ensure the dto has a drink item if your BarOrderItemDto expects it
+        DrinkItem cola = new DrinkItem();
+        cola.setId(99L);
+        cola.setName("Cola");
+        cola.setPrice(25.0);
+        oi.setDrinkItem(cola);
+
+        when(orderItemRepository.findItemsAfterForStation(since, lastId, "BAR"))
+                .thenReturn(List.of(oi));
+
+        List<BarOrderItemDto> res = service.getBarItems(since, lastId);
+
+        assertEquals(1, res.size());
+        assertNotNull(res.get(0));
+        assertEquals(12, res.get(0).tableNumber());
+        assertEquals(Instant.parse("2025-01-03T10:00:00Z"), res.get(0).sentAt());
+        assertNotNull(res.get(0).item());
+        assertNotNull(res.get(0).item().drinkItem());
+
+        verify(orderItemRepository).findItemsAfterForStation(since, lastId, "BAR");
+    }
+
+// ---------------- BAR: bumpBarTicket ----------------
+
+    @Test
+    void bumpBarTicket_callsRepositoryUpdate() {
+        Order order = openOrder(999L, 17);
+
+        when(orderRepository.findByTableNumberAndOrderStatus(17, OrderStatus.OPEN))
+                .thenReturn(Optional.of(order));
+
+        when(orderItemRepository.bumpItemsForStation(eq(999L), any(Instant.class), eq("BAR")))
+                .thenReturn(2);
+
+        service.bumpBarTicket(17);
+
+        verify(orderRepository).findByTableNumberAndOrderStatus(17, OrderStatus.OPEN);
+        verify(orderItemRepository).bumpItemsForStation(eq(999L), any(Instant.class), eq("BAR"));
+    }
+
+    @Test
+    void bumpBarTicket_throwsIfNoOpenOrder() {
+        when(orderRepository.findByTableNumberAndOrderStatus(17, OrderStatus.OPEN))
+                .thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class, () -> service.bumpBarTicket(17));
+
+        verify(orderRepository).findByTableNumberAndOrderStatus(17, OrderStatus.OPEN);
+        verifyNoInteractions(orderItemRepository);
     }
 
     @Test

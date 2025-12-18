@@ -1,0 +1,146 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: #f6f6f6;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  z-index: 10;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status {
+  font-size: 13px;
+  color: #444;
+  white-space: nowrap;
+}
+
+/* 5-column flow: fills down the screen then continues in next column */
+#board {
+  padding: 16px;
+  column-count: 5;
+  column-gap: 16px;
+  column-fill: auto;
+  height: calc(100vh - 54px); /* header height-ish */
+  overflow: hidden;
+}
+
+.ticket {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px 12px 10px 12px;
+  margin: 0 0 16px 0;
+
+  /* try to keep a ticket together; if too tall, browser may split */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.ticket.age-white {
+  background: white;
+}
+
+.ticket.age-yellow {
+  background: #fff4c2; /* soft yellow */
+}
+
+.ticket.age-red {
+  background: #ffd0d0; /* soft red */
+}
+
+.ticket h2 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.ticket .subtitle {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+.ticket .timer {
+  font-size: 12px;
+  color: #444;
+  font-weight: 600;
+}
+
+.divider {
+  height: 1px;
+  background: #ddd;
+  margin: 10px 0;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.qty {
+  font-weight: 800;
+  min-width: 34px;
+}
+
+.nameBlock {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 650;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin-top: 2px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Popover (click-to-bump menu) */
+.popover.hidden {
+  display: none;
+}
+
+.popover {
+  position: fixed;
+  z-index: 9999;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.popover-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
