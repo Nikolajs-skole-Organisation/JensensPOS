@@ -3,6 +3,7 @@ import {
   payOrder,
   compOrder,
   validateChiefPin,
+  compOrderItems
 } from "../services/orderApi.js";
 
 const orderTableInfoEl = document.getElementById("order-table-info");
@@ -150,6 +151,10 @@ function renderItems() {
   }
 
   itemsTitleEl.textContent = category.name;
+  if (category.name === "RABATTER") {
+  renderDiscountsCategory();
+  return;
+}
 
   // Food items
   if (category.foodItems && category.foodItems.length > 0) {
@@ -382,3 +387,96 @@ compBtn.addEventListener("click", async () => {
     alert(e.message);
   }
 });
+
+function renderDiscountsCategory() {
+  itemsContainerEl.innerHTML = "";
+
+  const btn = document.createElement("button");
+  btn.className = "item-btn";
+  btn.textContent = "Comp items";
+  btn.addEventListener("click", handleCompItemsClick);
+
+  itemsContainerEl.appendChild(btn);
+}
+
+async function handleCompItemsClick() {
+  if (!orderId) return;
+
+  const pin = prompt("Indtast 4-cifret CHIEF-kode:");
+  if (pin == null) return;
+
+  if (!/^\d{4}$/.test(pin)) {
+    alert("Koden skal være 4 cifre.");
+    return;
+  }
+
+  try {
+    await validateChiefPin(pin);
+  } catch (e) {
+    alert("Der skal bruges chief kode");
+    return;
+  }
+
+  const details = await fetchOrderDetails(orderId);
+  orderItems = details.items || [];
+
+  if (!orderItems.length) {
+    alert("Der er ingen varer på ordren.");
+    return;
+  }
+
+  const menuText = orderItems
+    .map((item, idx) => {
+      const name =
+        (item.foodItem && item.foodItem.name) ||
+        (item.drinkItem && item.drinkItem.name) ||
+        "Ukendt vare";
+
+      const temp = item.meatTemperature ? ` (${item.meatTemperature})` : "";
+      const comp = item.comped ? " [COMPED]" : "";
+
+      return `${idx + 1}) ${item.quantity} x ${name}${temp}${comp}`;
+    })
+    .join("\n");
+
+  const answer = prompt(
+    "Vælg hvilke linjer der skal compes (pris = 0).\n" +
+      "Skriv numre adskilt med komma (fx 1,3)\n\n" +
+      menuText
+  );
+
+  if (answer == null) return;
+
+  const indices = answer
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => Number.isInteger(n));
+
+  const chosenIds = indices
+    .map((n) => orderItems[n - 1])
+    .filter(Boolean)
+    .map((item) => item.id);
+
+  if (!chosenIds.length) {
+    alert("Ingen gyldige linjer valgt.");
+    return;
+  }
+
+  const reason = prompt("Angiv årsag til comp:");
+  if (reason == null || !reason.trim()) {
+    alert("Du skal angive en årsag.");
+    return;
+  }
+
+  try {
+    const receipt = await compOrderItems(orderId, pin, reason, chosenIds);
+
+    const updated = await fetchOrderDetails(orderId);
+    orderItems = updated.items || [];
+    renderOrderItems();
+
+    alert(`Items comp'et.\nTOTAL: ${receipt.total} kr`);
+  } catch (e) {
+    alert(e.message);
+  }
+}
