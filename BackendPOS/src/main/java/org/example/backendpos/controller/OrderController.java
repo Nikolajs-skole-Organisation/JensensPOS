@@ -72,4 +72,17 @@ public class OrderController {
     ) {
         return orderService.compOrder(orderId, request.pin(), request.reason());
     }
+
+    @PostMapping("/orders/{orderId}/items/comp")
+    public ReceiptDto compItems(
+            @PathVariable Long orderId,
+            @RequestBody CompItemRequest request
+    ) {
+        return orderService.compOrderItems(
+                orderId,
+                request.pin(),
+                request.reason(),
+                request.orderItemIds()
+        );
+    }
 }

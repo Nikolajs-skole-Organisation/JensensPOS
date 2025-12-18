@@ -145,8 +145,11 @@ public class InitData implements CommandLineRunner {
         Category personaleRetter = new Category();
         personaleRetter.setName("PERSONALE RETTER");
 
+        Category rabatter = new Category();
+        rabatter.setName("RABATTER");
+
         categoryRepository.saveAll(List.of(
-                forretter, hovedretter, desserter, drinks, gratis, tilbud, personaleRetter
+                forretter, hovedretter, desserter, drinks, gratis, tilbud, personaleRetter, rabatter
         ));
 
         // ----- Food items -----

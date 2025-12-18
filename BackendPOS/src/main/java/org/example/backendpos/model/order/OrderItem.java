@@ -46,6 +46,15 @@ public class OrderItem {
 
     private Instant bumpedAt;
 
+    @Column(name = "is_comped", nullable = false)
+    private boolean comped = false;
+
+    @Column(name = "comped_at")
+    private Instant compedAt;
+
+    @Column(name = "comp_reason")
+    private String compReason;
+
     public void incrementQuantity(){
         quantity++;
     }

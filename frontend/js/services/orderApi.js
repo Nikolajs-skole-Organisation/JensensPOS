@@ -42,3 +42,18 @@ export async function validateChiefPin(pin) {
     throw new Error(text || "Den skal bruge chief kode");
   }
 }
+
+export async function compOrderItems(orderId, pin, reason, orderItemIds) {
+  const res = await fetch(`${SERVICE_URL}/orders/${orderId}/items/comp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pin, reason, orderItemIds })
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Kunne ikke comp items");
+  }
+
+  return res.json(); 
+}

@@ -29,6 +29,8 @@ public interface OrderService {
 
     ReceiptDto compOrder(Long orderId, String pin, String reason);
 
+    ReceiptDto compOrderItems(Long orderId, String pin, String reason, List<Long> orderItemIds);
+
     void validateChiefPin(String pin);
 
     void sendToKitchenAndBar(int tableNumber);
